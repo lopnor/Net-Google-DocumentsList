@@ -3,6 +3,7 @@ name 'Net-Google-DocumentsList';
 all_from 'lib/Net/Google/DocumentsList.pm';
 
 # requires '';
+requires 'Net::Google::DataAPI';
 
 tests 't/*.t';
 author_tests 'xt';
