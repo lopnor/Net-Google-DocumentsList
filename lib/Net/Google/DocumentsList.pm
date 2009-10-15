@@ -12,6 +12,7 @@ with 'Net::Google::DataAPI::Role::Service' => {
         gAcl => 'http://schemas.google.com/acl/2007',
         batch => 'http://schemas.google.com/gdata/batch',
         docs => 'http://schemas.google.com/docs/2007',
+        app => 'http://www.w3.org/2007/app',
 
 
     }
@@ -19,7 +20,7 @@ with 'Net::Google::DataAPI::Role::Service' => {
 
 feedurl document => (
     entry_class => 'Net::Google::DocumentsList::Document',
-    default => 'http://docs.google.com/feeds/documents/private/full',
+    default => 'http://docs.google.com/feeds/default/private/full',
     is => 'ro',
 );
 
