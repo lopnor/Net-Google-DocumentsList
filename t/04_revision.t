@@ -1,7 +1,7 @@
 use t::Util;
 use Test::More;
 
-plan skip_all => 'revisions dont seem to work';
+plan skip_all => 'revisions dont seem to work, http://code.google.com/p/gdata-issues/issues/detail?id=1473';
 
 my $service = service();
 

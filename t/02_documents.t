@@ -21,6 +21,15 @@ for my $kind (qw(document spreadsheet presentation)) {
     }
     is $found->id, $d->id;
 
+    ok my $cat_found = $service->document(
+        {
+            title => $title, 
+            'title-exact' => 'true',
+            category => $kind,
+        }
+    );
+    is $cat_found->id, $d->id;
+
     my $updated_title = join('-', 'update title', scalar localtime);
     my $old_etag = $d->etag;
     ok $d->title($updated_title);
@@ -37,8 +46,26 @@ for my $kind (qw(document spreadsheet presentation)) {
     is $updated->id, $d->id;
     is $updated->etag, $d->etag;
 
-    $d->delete({delete => 1});
+    $d->delete;
+
     ok ! $service->document({title => $title, 'title-exact' => 'true'});
+
+    ok my $deleted_found = $service->document(
+        {
+            title => $updated_title,
+            'title-exact' => 'true',
+            category => [$kind, 'trash'],
+        }
+    );
+
+    $deleted_found->delete({delete => 1});
+    ok ! $service->document(
+        {
+            title => $title, 
+            'title-exact' => 'true',
+            category => [$kind, 'trash'],
+        }
+    );
 }
 
 done_testing;
