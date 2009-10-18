@@ -7,7 +7,7 @@ my $service = service();
 
 TODO: {
     local $TODO = 'revisions dont seem to work';
-    my $d = $service->add_document(
+    my $d = $service->add_item(
         {
             title => join(' - ', 'test for revision', scalar localtime),
             kind => 'document',

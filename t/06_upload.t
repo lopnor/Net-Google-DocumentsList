@@ -11,7 +11,7 @@ my $bom = $File::BOM::enc2bom{'UTF-8'};
 
 my $title = join(' - ', 'test for upload', scalar localtime);
 
-ok my $doc = $service->add_document(
+ok my $doc = $service->add_item(
     {
         title => $title,
         file => 't/data/foobar.txt',

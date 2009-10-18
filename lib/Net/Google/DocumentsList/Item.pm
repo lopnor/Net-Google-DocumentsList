@@ -1,17 +1,17 @@
-package Net::Google::DocumentsList::Document;
+package Net::Google::DocumentsList::Item;
 use Moose;
 use Net::Google::DataAPI;
 with 'Net::Google::DataAPI::Role::Entry';
 use XML::Atom::Util qw(nodelist);
 use File::Slurp;
 
-feedurl document => (
+feedurl item => (
     is => 'ro',
     as_content_src => 1,
-    entry_class => 'Net::Google::DocumentsList::Document',
+    entry_class => 'Net::Google::DocumentsList::Item',
 );
 
-with 'Net::Google::DocumentsList::Role::HasDocuments';
+with 'Net::Google::DocumentsList::Role::HasItems';
 
 feedurl 'acl' => (
     from_atom => sub {
@@ -67,7 +67,8 @@ sub delete {
     my ($self, $args) = @_;
     $self->service->request(
         {
-            uri => $self->editurl,
+#            uri => $self->editurl,
+            uri => join('/', $self->service->item_feedurl, $self->resource_id),
             method => 'DELETE',
 # XXX: deleting spreadsheet with etag raises 412
 #            header => {'If-Match' => $self->etag},
@@ -84,7 +85,7 @@ sub export {
         and confess "You can't export folder";
     my $res = $self->service->request(
         {
-            uri => $self->document_feedurl,
+            uri => $self->item_feedurl,
             query => {
                 exportFormat => $args->{format},
             },
@@ -132,7 +133,7 @@ sub move_to {
     my ($self, $dest) = @_;
 
     (
-        ref($dest) eq 'Net::Google::DocumentsList::Document'
+        ref($dest) eq 'Net::Google::DocumentsList::Item'
         && $dest->kind eq 'folder'
     ) or confess 'destination should be a folder';
     
@@ -140,7 +141,7 @@ sub move_to {
         {
             method => 'POST',
             content_type => 'application/atom+xml',            
-            uri => $dest->document_feedurl,
+            uri => $dest->item_feedurl,
             content => $self->atom->as_xml,
             response_object => 'XML::Atom::Entry',
         }

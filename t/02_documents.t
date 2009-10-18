@@ -6,7 +6,7 @@ ok my $service = service();
 for my $kind (qw(document spreadsheet presentation)) {
     my $title = join('-', 'test for N::G::DL', scalar localtime);
 
-    ok my $d = $service->add_document(
+    ok my $d = $service->add_item(
         {
             title => $title,
             kind => $kind,
@@ -14,14 +14,14 @@ for my $kind (qw(document spreadsheet presentation)) {
     );
 
     my $found;
-    sleep 6;
+    sleep 10;
     until ($found) {
-        $found = $service->document({title => $title, 'title-exact' => 'true'});
+        $found = $service->item({title => $title, 'title-exact' => 'true'});
         sleep 3;
     }
     is $found->id, $d->id;
 
-    ok my $cat_found = $service->document(
+    ok my $cat_found = $service->item(
         {
             title => $title, 
             'title-exact' => 'true',
@@ -37,9 +37,9 @@ for my $kind (qw(document spreadsheet presentation)) {
     isnt $d->etag, $old_etag;
 
     my $updated;
-    sleep 6;
+    sleep 10;
     until ($updated) {
-        $updated = $service->document({title => $updated_title, 'title-exact' => 'true'});
+        $updated = $service->item({title => $updated_title, 'title-exact' => 'true'});
         sleep 3;
     }
     is $updated->title, $updated_title;
@@ -48,9 +48,9 @@ for my $kind (qw(document spreadsheet presentation)) {
 
     $d->delete;
 
-    ok ! $service->document({title => $title, 'title-exact' => 'true'});
+    ok ! $service->item({title => $title, 'title-exact' => 'true'});
 
-    ok my $deleted_found = $service->document(
+    ok my $deleted_found = $service->item(
         {
             title => $updated_title,
             'title-exact' => 'true',
@@ -59,7 +59,7 @@ for my $kind (qw(document spreadsheet presentation)) {
     );
 
     $deleted_found->delete({delete => 1});
-    ok ! $service->document(
+    ok ! $service->item(
         {
             title => $title, 
             'title-exact' => 'true',

@@ -3,7 +3,7 @@ use Test::More;
 
 ok my $service = service();
 
-ok my $d = $service->add_document(
+ok my $d = $service->add_item(
     {
         title => join(' - ', 'test for acl', scalar localtime),
         kind => 'document',

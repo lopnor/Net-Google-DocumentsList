@@ -5,7 +5,7 @@ my $service = service();
 
 my $title = join(' - ', 'test for folder', scalar localtime);
 
-ok my $folder = $service->add_document(
+ok my $folder = $service->add_item(
     {
         title => $title,
         kind => 'folder',
@@ -15,7 +15,7 @@ ok my $folder = $service->add_document(
 sleep 6;
 my $found;
 until ($found) {
-    $found = $service->document(
+    $found = $service->item(
         { 
             title => $title,
             category => 'folder',
@@ -36,15 +36,15 @@ is $found->id, $folder->id;
     sleep 10;
     my $found_subfolder = $found->folder({title => $subfolder_title});
 
-    my $doc_title =  join(' - ', 'test for move document', scalar localtime);
-    my $doc = $found->add_document(
+    my $doc_title =  join(' - ', 'test for move item', scalar localtime);
+    my $doc = $found->add_item(
         {
             kind => 'document',
             title => $doc_title,
         }
     );
     sleep 10;
-    ok my $found_doc = $found->document(
+    ok my $found_doc = $found->item(
         {
             title => $doc_title,
             'title-exact' => 'true',
@@ -54,18 +54,28 @@ is $found->id, $folder->id;
 
     ok $doc->move_to($found_subfolder);
     sleep 10;
-    ok my $moved_doc = $found_subfolder->document(
+    ok my $moved_doc = $found_subfolder->item(
         {
             title => $doc_title,
             'title-exact' => 'true',
         }
     );
     is $moved_doc->id, $doc->id;
+    $moved_doc->delete;
+
+    sleep 15;
+    ok $service->item(
+        {
+            title => $doc_title,
+            category => 'trash',
+            'title-exact' => 'true',
+        }
+    );
 }
 
 
 $folder->delete({delete => 'ture'});
-ok ! $service->document(
+ok ! $service->item(
     {
         title => $title,
         category => 'folder',

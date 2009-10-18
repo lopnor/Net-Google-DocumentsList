@@ -1,24 +1,24 @@
-package Net::Google::DocumentsList::Role::HasDocuments;
+package Net::Google::DocumentsList::Role::HasItems;
 use Moose::Role;
 use Net::Google::DataAPI;
 use URI;
 use MIME::Types;
 use File::Slurp;
 
-requires 'documents', 'document', 'add_document';
+requires 'items', 'item', 'add_item';
 
-around documents => sub {
+around items => sub {
     my ($next, $self, $cond) = @_;
 
     if (my $cats = delete $cond->{category}) {
         $cats = [ "$cats" ] unless ref $cats eq 'ARRAY';
         my $uri = URI->new_abs(
             join('/','-', @$cats),
-            $self->document_feedurl. '/',
+            $self->item_feedurl. '/',
         );
         my $feed = $self->service->get_feed($uri, $cond);
         return map {
-            Net::Google::DocumentsList::Document->new(
+            Net::Google::DocumentsList::Item->new(
                 $self->can('sync') ? (container => $self) : (service => $self),
                 atom => $_,
             );
@@ -28,7 +28,7 @@ around documents => sub {
     }
 };
 
-around add_document => sub {
+around add_item => sub {
     my ($next, $self, $args) = @_;
     if (my $file = delete $args->{file}) {
         -r $file or confess "File $file does not exist";
@@ -37,13 +37,13 @@ around add_document => sub {
         );
         my $ref = read_file($file, scalar_ref => 1, binmode=>':raw');
         $part->content_ref($ref);
-        my $entry = Net::Google::DocumentsList::Document->new(
+        my $entry = Net::Google::DocumentsList::Item->new(
             $self->can('sync') ? (container => $self) : (service => $self),
             %$args,
         )->to_atom;
         my $atom = $self->service->request(
             {  
-                uri => $self->document_feedurl,
+                uri => $self->item_feedurl,
                 parts => [
                     HTTP::Message->new(
                         ['Content-Type' => 'application/atom+xml'],
@@ -55,7 +55,7 @@ around add_document => sub {
             }
         );
         $self->sync if $self->can('sync');
-        return Net::Google::DocumentsList::Document->new(
+        return Net::Google::DocumentsList::Item->new(
             $self->can('sync') ? (container => $self) : (service => $self),
             atom => $atom,
         );
@@ -66,7 +66,7 @@ around add_document => sub {
 
 sub add_folder {
     my ($self, $args) = @_;
-    return $self->add_document(
+    return $self->add_item(
         {
             %$args,
             kind => 'folder',
@@ -76,7 +76,7 @@ sub add_folder {
 
 sub folders {
     my ($self, $args) = @_;
-    return $self->documents(
+    return $self->items(
         {
             %$args,
             category => 'folder',

@@ -17,13 +17,13 @@ with 'Net::Google::DataAPI::Role::Service' => {
     }
 };
 
-feedurl document => (
-    entry_class => 'Net::Google::DocumentsList::Document',
+feedurl item => (
+    entry_class => 'Net::Google::DocumentsList::Item',
     default => 'http://docs.google.com/feeds/default/private/full',
     is => 'ro',
 );
 
-with 'Net::Google::DocumentsList::Role::HasDocuments';
+with 'Net::Google::DocumentsList::Role::HasItems';
 
 1;
 __END__
