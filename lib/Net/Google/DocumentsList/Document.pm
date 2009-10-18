@@ -3,6 +3,31 @@ use Moose;
 use Net::Google::DataAPI;
 with 'Net::Google::DataAPI::Role::Entry';
 use XML::Atom::Util qw(nodelist);
+use File::Slurp;
+
+feedurl document => (
+    is => 'ro',
+    as_content_src => 1,
+    entry_class => 'Net::Google::DocumentsList::Document',
+);
+
+with 'Net::Google::DocumentsList::Role::HasDocuments';
+
+feedurl 'acl' => (
+    from_atom => sub {
+        my ($self, $atom) = @_;
+        return $self->_get_feedlink('http://schemas.google.com/acl/2007#accessControlList');
+    },
+    entry_class => 'Net::Google::DocumentsList::ACL',
+);
+
+feedurl 'revision' => (
+    from_atom => sub {
+        my ($self, $atom) = @_;
+        return $self->_get_feedlink('http://schemas.google.com/docs/2007/revisions');
+    },
+    entry_class => 'Net::Google::DocumentsList::Revision',
+);
 
 entry_has 'published' => ( tagname => 'published', is => 'ro' );
 entry_has 'updated' => ( tagname => 'updated', is => 'ro' );
@@ -29,22 +54,6 @@ entry_has 'kind' => (
     }
 );
 
-feedurl 'acl' => (
-    from_atom => sub {
-        my ($self, $atom) = @_;
-        return $self->_get_feedlink('http://schemas.google.com/acl/2007#accessControlList');
-    },
-    entry_class => 'Net::Google::DocumentsList::ACL',
-);
-
-feedurl 'revision' => (
-    from_atom => sub {
-        my ($self, $atom) = @_;
-        return $self->_get_feedlink('http://schemas.google.com/docs/2007/revisions');
-    },
-    entry_class => 'Net::Google::DocumentsList::Revision',
-);
-
 sub _get_feedlink {
     my ($self, $rel) = @_;
     my ($feedurl) = 
@@ -67,5 +76,56 @@ sub delete {
         }
     );
 };
+
+sub export {
+    my ($self, $args) = @_;
+
+    $self->kind eq 'folder' 
+        and confess "You can't export folder";
+    my $res = $self->service->request(
+        {
+            uri => $self->document_feedurl,
+            query => {
+                exportFormat => $args->{format},
+            },
+        }
+    );
+    if ($res->is_success) {
+        if ( my $file = $args->{file} ) {
+            my $content = $res->content_ref;
+            return write_file( $file, {binmode => ':raw'}, $content );
+        }
+        return $res->decoded_content;
+    }
+}
+
+sub update_content {
+    my ($self, $file) = @_;
+
+    $self->kind eq 'folder' 
+        and confess "You can't update folder content with a file";
+    -r $file or confess "File $file does not exist";
+    my $part = HTTP::Message->new(
+        ['Content-Type' => MIME::Types->new->mimeTypeOf($file)->type ]
+    );
+    my $ref = read_file($file, scalar_ref => 1, binmode=>':raw');
+    $part->content_ref($ref);
+    my $atom = $self->service->request(
+        {
+            method => 'PUT',
+            uri => $self->editurl,
+            parts => [
+                HTTP::Message->new(
+                    ['Content-Type' => 'application/atom+xml'],
+                    $self->atom->as_xml,
+                ),
+                $part,
+            ],
+            response_object => 'XML::Atom::Entry',
+        }
+    );
+    $self->container->sync if $self->container;
+    $self->atom($atom);
+}
 
 1;

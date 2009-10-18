@@ -1,7 +1,7 @@
 package Net::Google::DocumentsList;
 use Moose;
 use Net::Google::DataAPI;
-use URI;
+use 5.008001;
 
 our $VERSION = '0.01';
 
@@ -23,26 +23,7 @@ feedurl document => (
     is => 'ro',
 );
 
-around documents => sub {
-    my ($next, $self, $cond) = @_;
-
-    if (my $cats = delete $cond->{category}) {
-        $cats = [ "$cats" ] unless ref $cats eq 'ARRAY';
-        my $uri = URI->new_abs(
-            join('/','-', @$cats),
-            $self->document_feedurl. '/',
-        );
-        my $feed = $self->service->get_feed($uri, $cond);
-        return map {
-            Net::Google::DocumentsList::Document->new(
-                service => $self,
-                atom => $_,
-            );
-        } $feed->entries;
-    } else {
-        return $next->($self, $cond);
-    }
-};
+with 'Net::Google::DocumentsList::Role::HasDocuments';
 
 1;
 __END__

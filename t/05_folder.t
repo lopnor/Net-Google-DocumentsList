@@ -25,6 +25,18 @@ until ($found) {
 }
 
 is $found->id, $folder->id;
+
+{
+    my $subfolder_title = join(' - ', 'test for subfolder', scalar localtime);
+    ok my $subfolder = $found->add_folder(
+        {
+            title => $subfolder_title,
+        }
+    );
+    sleep 10;
+    my $found_subfolder = $found->folder({title => $subfolder_title});
+}
+
 $folder->delete({delete => 'ture'});
 ok ! $service->document(
     {

@@ -9,6 +9,7 @@ tests 't/*.t';
 author_tests 'xt';
 
 build_requires 'Test::More';
+build_requires 'File::BOM';
 use_test_base;
 auto_include;
 WriteAll;
