@@ -35,7 +35,34 @@ is $found->id, $folder->id;
     );
     sleep 10;
     my $found_subfolder = $found->folder({title => $subfolder_title});
+
+    my $doc_title =  join(' - ', 'test for move document', scalar localtime);
+    my $doc = $found->add_document(
+        {
+            kind => 'document',
+            title => $doc_title,
+        }
+    );
+    sleep 10;
+    ok my $found_doc = $found->document(
+        {
+            title => $doc_title,
+            'title-exact' => 'true',
+        }
+    );
+    is $found_doc->id, $doc->id;
+
+    ok $doc->move_to($found_subfolder);
+    sleep 10;
+    ok my $moved_doc = $found_subfolder->document(
+        {
+            title => $doc_title,
+            'title-exact' => 'true',
+        }
+    );
+    is $moved_doc->id, $doc->id;
 }
+
 
 $folder->delete({delete => 'ture'});
 ok ! $service->document(

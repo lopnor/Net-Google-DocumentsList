@@ -128,4 +128,26 @@ sub update_content {
     $self->atom($atom);
 }
 
+sub move_to {
+    my ($self, $dest) = @_;
+
+    (
+        ref($dest) eq 'Net::Google::DocumentsList::Document'
+        && $dest->kind eq 'folder'
+    ) or confess 'destination should be a folder';
+    
+    my $atom = $self->service->request(
+        {
+            method => 'POST',
+            content_type => 'application/atom+xml',            
+            uri => $dest->document_feedurl,
+            content => $self->atom->as_xml,
+            response_object => 'XML::Atom::Entry',
+        }
+    );
+    $self->container->sync if $self->container;
+    $dest->sync;
+    $self->atom($atom);
+}
+
 1;
