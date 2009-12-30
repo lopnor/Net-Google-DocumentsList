@@ -30,6 +30,7 @@ around items => sub {
 
 around add_item => sub {
     my ($next, $self, $args) = @_;
+    my $item;
     if (my $file = delete $args->{file}) {
         -r $file or confess "File $file does not exist";
         my $part = HTTP::Message->new(
@@ -55,12 +56,27 @@ around add_item => sub {
             }
         );
         $self->sync if $self->can('sync');
-        return Net::Google::DocumentsList::Item->new(
+        $item = Net::Google::DocumentsList::Item->new(
             $self->can('sync') ? (container => $self) : (service => $self),
             atom => $atom,
         );
     } else {
-        return $next->($self, $args);
+        $item = $next->($self, $args);
+    }
+    if ($item) {
+        my $found;
+        for (1 .. 5) {
+            $found = $self->item(
+                {
+                    title => $item->title,
+                    'title-exact' => 'true',
+                    kind => $item->kind,
+                }
+            ) and last;
+            sleep 3;
+        }
+        $found or die "added item couldn't retrieve";
+        return $found;
     }
 };
 

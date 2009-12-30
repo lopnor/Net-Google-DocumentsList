@@ -64,21 +64,6 @@ sub _get_feedlink {
     return $feedurl;
 }
 
-sub delete {
-    my ($self, $args) = @_;
-    $self->service->request(
-        {
-#            uri => $self->editurl,
-            uri => join('/', $self->service->item_feedurl, $self->resource_id),
-            method => 'DELETE',
-# XXX: deleting spreadsheet with etag raises 412
-#            header => {'If-Match' => $self->etag},
-            header => {'If-Match' => '*'},
-            $args->{delete} ? (query => {delete => 'true'}) : (),
-        }
-    );
-};
-
 sub export {
     my ($self, $args) = @_;
 
@@ -164,8 +149,7 @@ sub move_out_of {
         {
             method => 'DELETE',
             uri => join('/', $folder->item_feedurl, $self->resource_id),
-#            header => {'If-Match' => $self->etag},
-            header => {'If-Match' => '*'},
+            header => {'If-Match' => $self->etag},
         }
     );
     if ($res->is_success) {

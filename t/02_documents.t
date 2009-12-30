@@ -13,13 +13,9 @@ for my $kind (qw(document spreadsheet presentation)) {
         }
     );
 
-    my $found;
-    sleep 10;
-    until ($found) {
-        $found = $service->item({title => $title, 'title-exact' => 'true'});
-        sleep 3;
-    }
+    my $found = $service->item({title => $title, 'title-exact' => 'true'});
     is $found->id, $d->id;
+    is $found->etag, $d->etag;
 
     ok my $cat_found = $service->item(
         {
@@ -29,6 +25,7 @@ for my $kind (qw(document spreadsheet presentation)) {
         }
     );
     is $cat_found->id, $d->id;
+    is $cat_found->etag, $d->etag;
 
     my $updated_title = join('-', 'update title', scalar localtime);
     my $old_etag = $d->etag;
@@ -37,7 +34,7 @@ for my $kind (qw(document spreadsheet presentation)) {
     isnt $d->etag, $old_etag;
 
     my $updated;
-    sleep 15;
+#    sleep 15;
     until ($updated) {
         $updated = $service->item({title => $updated_title, 'title-exact' => 'true'});
         sleep 3;
