@@ -1,5 +1,5 @@
 package Net::Google::DocumentsList::Role::HasItems;
-use Moose::Role;
+use Any::Moose '::Role';
 use Net::Google::DataAPI;
 use URI;
 use MIME::Types;

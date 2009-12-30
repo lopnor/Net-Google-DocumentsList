@@ -1,5 +1,6 @@
 package Net::Google::DocumentsList::Item;
-use Moose;
+use Any::Moose;
+use namespace::autoclean;
 use Net::Google::DataAPI;
 with 'Net::Google::DataAPI::Role::Entry';
 use XML::Atom::Util qw(nodelist);
@@ -149,6 +150,29 @@ sub move_to {
     $self->container->sync if $self->container;
     $dest->sync;
     $self->atom($atom);
+}
+
+sub move_out_of {
+    my ($self, $folder) = @_;
+
+    (
+        ref($folder) eq 'Net::Google::DocumentsList::Item'
+        && $folder->kind eq 'folder'
+    ) or confess 'the argument should be a folder';
+    
+    my $res = $self->service->request(
+        {
+            method => 'DELETE',
+            uri => join('/', $folder->item_feedurl, $self->resource_id),
+#            header => {'If-Match' => $self->etag},
+            header => {'If-Match' => '*'},
+        }
+    );
+    if ($res->is_success) {
+        $self->container->sync if $self->container;
+        $folder->sync;
+        $self->sync;
+    }
 }
 
 1;

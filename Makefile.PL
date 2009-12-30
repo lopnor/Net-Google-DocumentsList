@@ -3,7 +3,16 @@ name 'Net-Google-DocumentsList';
 all_from 'lib/Net/Google/DocumentsList.pm';
 
 # requires '';
-requires 'Net::Google::DataAPI';
+requires_any_moose(
+    moose => '0.56',
+    mouse => '0.40',
+);
+requires 'Net::Google::DataAPI' => '0.10';
+requires 'namespace::autoclean';
+requires 'XML::Atom';
+requires 'File::Slurp';
+requires 'MIME::Types';
+requires 'URI';
 
 tests 't/*.t';
 author_tests 'xt';

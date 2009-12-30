@@ -37,7 +37,7 @@ for my $kind (qw(document spreadsheet presentation)) {
     isnt $d->etag, $old_etag;
 
     my $updated;
-    sleep 10;
+    sleep 15;
     until ($updated) {
         $updated = $service->item({title => $updated_title, 'title-exact' => 'true'});
         sleep 3;

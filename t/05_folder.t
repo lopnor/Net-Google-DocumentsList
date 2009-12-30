@@ -43,7 +43,7 @@ is $found->id, $folder->id;
             title => $doc_title,
         }
     );
-    sleep 10;
+    sleep 10; 
     ok my $found_doc = $found->item(
         {
             title => $doc_title,
@@ -61,9 +61,29 @@ is $found->id, $folder->id;
         }
     );
     is $moved_doc->id, $doc->id;
-    $moved_doc->delete;
 
-    sleep 15;
+    $moved_doc->move_out_of($found_subfolder);
+
+    sleep 10;
+    TODO: {
+        local $TODO = "This might be google's bug";
+        ok ! $found_subfolder->item(
+            {
+                title => $doc_title,
+                'title-exact' => 'true',
+            }
+        );
+    }
+    ok my $moved_again = $found->item(
+        {
+            title => $doc_title,
+            'title-exact' => 'true',
+        }
+    );
+
+    $moved_again->delete;
+
+    sleep 10;
     ok $service->item(
         {
             title => $doc_title,
