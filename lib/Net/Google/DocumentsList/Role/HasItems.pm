@@ -1,15 +1,18 @@
 package Net::Google::DocumentsList::Role::HasItems;
 use Any::Moose '::Role';
+with 'Net::Google::DocumentsList::Role::EnsureListed';
 use Net::Google::DataAPI;
 use URI;
 use MIME::Types;
 use File::Slurp;
+use Carp;
 
 requires 'items', 'item', 'add_item';
 
 around items => sub {
     my ($next, $self, $cond) = @_;
 
+    my @items;
     if (my $cats = delete $cond->{category}) {
         $cats = [ "$cats" ] unless ref $cats eq 'ARRAY';
         my $uri = URI->new_abs(
@@ -17,15 +20,19 @@ around items => sub {
             $self->item_feedurl. '/',
         );
         my $feed = $self->service->get_feed($uri, $cond);
-        return map {
+        @items = map {
             Net::Google::DocumentsList::Item->new(
                 $self->can('sync') ? (container => $self) : (service => $self),
                 atom => $_,
             );
         } $feed->entries;
     } else {
-        return $next->($self, $cond);
+        @items = $next->($self, $cond);
     }
+    if ($self->can('sync')) {
+        @items = grep {$_->parent eq $self->_url_with_resource_id} @items;
+    }
+    @items;
 };
 
 around add_item => sub {
@@ -63,21 +70,7 @@ around add_item => sub {
     } else {
         $item = $next->($self, $args);
     }
-    if ($item) {
-        my $found;
-        for (1 .. 5) {
-            $found = $self->item(
-                {
-                    title => $item->title,
-                    'title-exact' => 'true',
-                    kind => $item->kind,
-                }
-            ) and last;
-            sleep 3;
-        }
-        $found or die "added item couldn't retrieve";
-        return $found;
-    }
+    return $self->ensure_listed($item, {etag_should_change => 1});
 };
 
 sub add_folder {

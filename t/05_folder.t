@@ -12,17 +12,12 @@ ok my $folder = $service->add_item(
     }
 );
 
-sleep 6;
-my $found;
-until ($found) {
-    $found = $service->item(
-        { 
-            title => $title,
-            category => 'folder',
-        },
-    );
-    sleep 3;
-}
+ok my $found = $service->item(
+    { 
+        title => $title,
+        category => 'folder',
+    },
+);
 
 is $found->id, $folder->id;
 
@@ -33,8 +28,7 @@ is $found->id, $folder->id;
             title => $subfolder_title,
         }
     );
-    sleep 10;
-    my $found_subfolder = $found->folder({title => $subfolder_title});
+    ok my $found_subfolder = $found->folder({title => $subfolder_title});
 
     my $doc_title =  join(' - ', 'test for move item', scalar localtime);
     my $doc = $found->add_item(
@@ -43,7 +37,6 @@ is $found->id, $folder->id;
             title => $doc_title,
         }
     );
-    sleep 10; 
     ok my $found_doc = $found->item(
         {
             title => $doc_title,
@@ -53,7 +46,6 @@ is $found->id, $folder->id;
     is $found_doc->id, $doc->id;
 
     ok $doc->move_to($found_subfolder);
-    sleep 10;
     ok my $moved_doc = $found_subfolder->item(
         {
             title => $doc_title,
@@ -62,18 +54,16 @@ is $found->id, $folder->id;
     );
     is $moved_doc->id, $doc->id;
 
+    diag 'moving doc out of subfolder';
     $moved_doc->move_out_of($found_subfolder);
 
-    sleep 10;
-    TODO: {
-        local $TODO = "This might be google's bug";
-        ok ! $found_subfolder->item(
-            {
-                title => $doc_title,
-                'title-exact' => 'true',
-            }
-        );
-    }
+    ok ! $found_subfolder->item(
+        {
+            title => $moved_doc->title,
+            'title-exact' => 'true',
+        }
+    );
+    ok ! grep {$_->title eq $moved_doc->title} $found_subfolder->items;
     ok my $moved_again = $found->item(
         {
             title => $doc_title,
@@ -81,20 +71,19 @@ is $found->id, $folder->id;
         }
     );
 
+    is $found, $moved_again->container;
     $moved_again->delete;
 
-    sleep 10;
     ok $service->item(
         {
             title => $doc_title,
-            category => 'trash',
+            category => 'trashed',
             'title-exact' => 'true',
         }
     );
 }
-
-
-$folder->delete({delete => 'ture'});
+diag 'deleting folder';
+$found->delete({delete => 'ture'});
 ok ! $service->item(
     {
         title => $title,

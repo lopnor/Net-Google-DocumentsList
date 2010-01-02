@@ -4,6 +4,7 @@ use Test::More;
 ok my $service = service();
 
 for my $kind (qw(document spreadsheet presentation)) {
+    diag "testing $kind";
     my $title = join('-', 'test for N::G::DL', scalar localtime);
 
     ok my $d = $service->add_item(
@@ -13,7 +14,7 @@ for my $kind (qw(document spreadsheet presentation)) {
         }
     );
 
-    my $found = $service->item({title => $title, 'title-exact' => 'true'});
+    ok my $found = $service->item({title => $title, 'title-exact' => 'true'});
     is $found->id, $d->id;
     is $found->etag, $d->etag;
 
@@ -33,34 +34,37 @@ for my $kind (qw(document spreadsheet presentation)) {
     is $d->title, $updated_title;
     isnt $d->etag, $old_etag;
 
-    my $updated;
-#    sleep 15;
-    until ($updated) {
-        $updated = $service->item({title => $updated_title, 'title-exact' => 'true'});
-        sleep 3;
-    }
+    ok my $updated = $service->item({title => $updated_title, 'title-exact' => 'true'});
     is $updated->title, $updated_title;
     is $updated->id, $d->id;
     is $updated->etag, $d->etag;
 
     $d->delete;
 
-    ok ! $service->item({title => $title, 'title-exact' => 'true'});
+    ok my $d1 = $service->item({title => $updated_title, 'title-exact' => 'true'});
+    is $d1->deleted, 1;
 
-    ok my $deleted_found = $service->item(
+    ok my $trashed = $service->item(
         {
             title => $updated_title,
             'title-exact' => 'true',
-            category => [$kind, 'trash'],
+            category => [$kind, 'trashed'],
         }
-    );
+    ), 'find trashed item';
 
-    $deleted_found->delete({delete => 1});
+    $trashed->delete({delete => 1});
     ok ! $service->item(
         {
-            title => $title, 
+            title => $updated_title, 
             'title-exact' => 'true',
-            category => [$kind, 'trash'],
+            category => $kind,
+        }
+    );
+    ok ! $service->item(
+        {
+            title => $updated_title, 
+            'title-exact' => 'true',
+            category => [$kind, 'trashed'],
         }
     );
 }

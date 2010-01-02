@@ -2,9 +2,14 @@ package Net::Google::DocumentsList::Item;
 use Any::Moose;
 use namespace::autoclean;
 use Net::Google::DataAPI;
-with 'Net::Google::DataAPI::Role::Entry';
-use XML::Atom::Util qw(nodelist);
+with 'Net::Google::DataAPI::Role::Entry',
+    'Net::Google::DocumentsList::Role::EnsureListed';
+use XML::Atom::Util qw(nodelist first);
 use File::Slurp;
+use Carp;
+use URI::Escape;
+
+our $SLEEP = 5;
 
 feedurl item => (
     is => 'ro',
@@ -12,7 +17,28 @@ feedurl item => (
     entry_class => 'Net::Google::DocumentsList::Item',
 );
 
-with 'Net::Google::DocumentsList::Role::HasItems';
+entry_has 'kind' => (
+    is => 'ro',
+    from_atom => sub {
+        my ($self, $atom) = @_;
+        my ($kind) = 
+            map {$_->label}
+            grep {$_->scheme eq 'http://schemas.google.com/g/2005#kind'}
+            $atom->categories;
+        return $kind;
+    },
+    to_atom => sub {
+        my ($self, $atom) = @_;
+        my $cat = XML::Atom::Category->new;
+        $cat->scheme('http://schemas.google.com/g/2005#kind');
+        $cat->label($self->kind);
+        $cat->term(join("#", "http://schemas.google.com/docs/2007", $self->kind));
+        $atom->category($cat);
+    }
+);
+
+with 'Net::Google::DocumentsList::Role::HasItems',
+    'Net::Google::DocumentsList::Role::Exportable';
 
 feedurl 'acl' => (
     from_atom => sub {
@@ -35,25 +61,33 @@ entry_has 'updated' => ( tagname => 'updated', is => 'ro' );
 entry_has 'edited' => ( tagname => 'edited', ns => 'app', is => 'ro' );
 entry_has 'resource_id' => ( tagname => 'resourceId', ns => 'gd', is => 'ro' );
 entry_has 'last_viewd' => ( tagname => 'lastViewed', ns => 'gd', is => 'ro' );
-entry_has 'kind' => (
+entry_has 'deleted' => ( 
     is => 'ro',
+    isa => 'Bool',
     from_atom => sub {
         my ($self, $atom) = @_;
-        my ($kind) = 
-            map {$_->label}
-            grep {$_->scheme eq 'http://schemas.google.com/g/2005#kind'}
-            $atom->categories;
-        return $kind;
+        first($atom->elem, $self->ns('gd')->{uri}, 'deleted') ? 1 : 0;
     },
-    to_atom => sub {
+);
+entry_has 'parent' => (
+    is => 'ro',
+    isa => 'Str',
+    from_atom => sub {
         my ($self, $atom) = @_;
-        my $cat = XML::Atom::Category->new;
-        $cat->scheme('http://schemas.google.com/g/2005#kind');
-        $cat->label($self->kind);
-        $cat->term(join("#", "http://schemas.google.com/docs/2007", $self->kind));
-        $atom->category($cat);
+        $self->container or return;
+        my ($parent) = 
+            grep {$_ eq $self->container->_url_with_resource_id}
+            map {$_->href}
+            grep {$_->rel eq 'http://schemas.google.com/docs/2007#parent'}
+            $atom->link;
+        $parent;
     }
 );
+
+sub _url_with_resource_id {
+    my ($self) = @_;
+    join('/', $self->service->item_feedurl, uri_escape $self->resource_id);
+}
 
 sub _get_feedlink {
     my ($self, $rel) = @_;
@@ -62,28 +96,6 @@ sub _get_feedlink {
         grep {$_->getAttribute('rel') eq $rel}
         nodelist($self->elem, $self->ns('gd')->{uri}, 'feedLink');
     return $feedurl;
-}
-
-sub export {
-    my ($self, $args) = @_;
-
-    $self->kind eq 'folder' 
-        and confess "You can't export folder";
-    my $res = $self->service->request(
-        {
-            uri => $self->item_feedurl,
-            query => {
-                exportFormat => $args->{format},
-            },
-        }
-    );
-    if ($res->is_success) {
-        if ( my $file = $args->{file} ) {
-            my $content = $res->content_ref;
-            return write_file( $file, {binmode => ':raw'}, $content );
-        }
-        return $res->decoded_content;
-    }
 }
 
 sub update_content {
@@ -153,10 +165,59 @@ sub move_out_of {
         }
     );
     if ($res->is_success) {
+        $self->ensure_not_listed($folder);
         $self->container->sync if $self->container;
         $folder->sync;
         $self->sync;
     }
 }
+
+sub update {
+    my ($self) = @_;
+    $self->etag or return;
+    my $parent = $self->container || $self->service;
+    my $atom = $self->service->put(
+        {
+            self => $self,
+            entry => $self->to_atom,
+        }
+    );
+    my $item = (ref $self)->new(
+        $self->container ? (container => $self->container) 
+        : ( service => $self->service),
+        atom => $atom
+    );
+    my $updated = $parent->ensure_listed($item);
+    $self->container->sync if $self->container;
+    $self->atom($updated->atom);
+}
+
+sub delete {
+    my ($self, $args) = @_;
+
+    my $parent = $self->container || $self->service;
+
+    my $selfurl = $self->container ?
+        join('/', $self->service->item_feedurl, $self->resource_id)
+        : $self->selfurl;
+
+    $args->{delete} = 'true' if $args->{delete};
+    $self->service->request(
+        {
+            uri => $selfurl,
+            method => 'DELETE',
+            header => {'If-Match' => $self->etag},
+            self => $self,
+            query => $args,
+        }
+    );
+    if ($args->{delete}) {
+        $parent->ensure_deleted($self);
+    } else {
+        $parent->ensure_trashed($self);
+    }
+}
+
+__PACKAGE__->meta->make_immutable;
 
 1;
