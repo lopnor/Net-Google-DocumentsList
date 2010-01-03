@@ -2,8 +2,7 @@ package Net::Google::DocumentsList;
 use Any::Moose;
 use namespace::autoclean;
 use Net::Google::DataAPI;
-use Net::Google::DataAPI::Auth::AuthSub;
-use Net::Google::AuthSub;
+use Net::Google::DataAPI::Auth::ClientLogin::Multiple;
 use 5.008001;
 
 our $VERSION = '0.01';
@@ -29,17 +28,15 @@ has source => (is => 'ro', isa => 'Str', required => 1, default => __PACKAGE__ .
 
 sub _build_auth {
     my ($self) = @_;
-    my $authsub = Net::Google::AuthSub->new(
+    Net::Google::DataAPI::Auth::ClientLogin::Multiple->new(
         source => $self->source,
-        service => 'writely',
         accountType => $self->account_type,
-    );
-    my $res = $authsub->login( $self->username, $self->password );
-    unless ($res && $res->is_success) {
-        die 'Net::Google::AuthSub login failed';
-    }
-    return Net::Google::DataAPI::Auth::AuthSub->new(
-        authsub => $authsub,
+        services => {
+            'docs.google.com' => 'writely',
+            'spreadsheets.google.com' => 'wise',
+        },
+        username => $self->username,
+        password => $self->password,
     );
 }
 
@@ -58,21 +55,33 @@ __END__
 
 =head1 NAME
 
-Net::Google::DocumentsList -
+Net::Google::DocumentsList - Perl interface to Google Documents List Data API
 
 =head1 SYNOPSIS
 
   use Net::Google::DocumentsList;
 
+  my $service = Net::Google::DocumentsList->new(
+    username => 'myname@gmail.com',
+    password => 'p4$$w0rd'
+  );
+  
+
 =head1 DESCRIPTION
 
-Net::Google::DocumentsList is
+Net::Google::DocumentsList is a Perl interface to Google Documents List Data API.
 
 =head1 AUTHOR
 
 Noubo Danjou E<lt>nobuo.danjou@gmail.comE<gt>
 
 =head1 SEE ALSO
+
+L<XML::Atom>
+
+L<Net::Google::DataAPI>
+
+L<http://code.google.com/apis/documents/docs/3.0/developers_guide_protocol.html>
 
 =head1 LICENSE
 

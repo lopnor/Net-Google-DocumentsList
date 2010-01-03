@@ -15,7 +15,7 @@ entry_has 'role' => (
     },
     to_atom => sub {
         my ($self, $atom) = @_;
-        $atom->set($self->ns('gAcl'),'role', undef, {value => $self->role});
+        $atom->set($self->ns('gAcl'),'role', '', {value => $self->role});
     }
 );
 entry_has 'scope' => (
@@ -31,7 +31,7 @@ entry_has 'scope' => (
     },
     to_atom => sub {
         my ($self, $atom) = @_;
-        $atom->set($self->ns('gAcl'),'scope', undef, $self->scope);
+        $atom->set($self->ns('gAcl'),'scope', '', $self->scope);
     },
 );
 

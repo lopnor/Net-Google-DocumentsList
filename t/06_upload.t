@@ -18,19 +18,21 @@ ok my $doc = $service->add_item(
     }
 );
 my $file = File::Temp->new;
-ok $doc->export(
-    {
-        format => 'txt',
-        file => $file,
-    }
-);
+ok eval {
+    $doc->export(
+        {
+            format => 'txt',
+            file => $file,
+        }
+    )
+};
 close $file;
 open my $fh, "<:via(File::BOM)", $file->filename;
 my $content = do {local $/; <$fh>};
 is $content, "foobar";
 
 ok $doc->update_content('t/data/hogefuga.txt');
-my $export = $doc->export({format => 'txt'});
+ok my $export = eval { $doc->export({format => 'txt'}) };
 is Encode::encode('utf-8', $export), $bom.'hogefuga';
 
 ok $doc->delete({delete => 'true'});

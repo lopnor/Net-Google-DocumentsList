@@ -20,12 +20,16 @@ sub ensure_listed {
     my $found_item;
     for (1 .. $RETRY) {
         $found_item = $self->_find_entry($item);
+        if ($found_item->title ne $item->title) {
+            undef $found_item;
+            sleep $SLEEP;
+            next;
+        }
         if ($args->{etag_should_change}) {
             $found_item->etag eq $item->etag and next;
+            # retry, but keep $found_item (it would the the true item)
         }
-        $found_item->title eq $item->title and last;
-        undef $found_item;
-        sleep $SLEEP;
+        last;
     }
     $found_item or confess "updated entry couldn't be retrieved"; 
     $item->container->sync if $item->container;
@@ -34,8 +38,6 @@ sub ensure_listed {
 
 sub ensure_not_listed {
     my ($self, $folder) = @_;
-    # XXX doesn't work well now...
-    #return;
 
     my $found;
     for (1 .. $RETRY) {
@@ -104,16 +106,6 @@ sub ensure_deleted {
         sleep $SLEEP;
     }
     $found and confess "couldn't delete the item";
-}
-
-sub _ensure_etag_updated {
-    my ($self, $etag) = @_;
-    for (1 .. $RETRY) {
-        $self->sync;
-        $self->etag ne $etag and last;
-        sleep $SLEEP;
-    }
-    $self->etag eq $etag and confess "couldn't see contaier etag updated";
 }
 
 sub _find_entry {
