@@ -5,7 +5,6 @@ use Net::Google::DataAPI;
 with 'Net::Google::DataAPI::Role::Entry',
     'Net::Google::DocumentsList::Role::EnsureListed';
 use XML::Atom::Util qw(nodelist first);
-use File::Slurp;
 use Carp;
 use URI::Escape;
 
@@ -144,9 +143,14 @@ sub move_to {
             response_object => 'XML::Atom::Entry',
         }
     );
+    my $item = (ref $self)->new(
+        container => $dest,
+        atom => $atom,
+    );
+    my $updated = $dest->ensure_listed($item);
     $self->container->sync if $self->container;
     $dest->sync;
-    $self->atom($atom);
+    $self->atom($updated->atom);
 }
 
 sub move_out_of {
@@ -197,12 +201,10 @@ sub delete {
 
     my $parent = $self->container || $self->service;
 
-    my $selfurl = $self->container ?
-        join('/', $self->service->item_feedurl, $self->resource_id)
-        : $self->selfurl;
+    my $selfurl = $self->container ? $self->_url_with_resource_id : $self->selfurl;
 
     $args->{delete} = 'true' if $args->{delete};
-    $self->service->request(
+    my $res = $self->service->request(
         {
             uri => $selfurl,
             method => 'DELETE',
@@ -211,11 +213,13 @@ sub delete {
             query => $args,
         }
     );
+    $res->is_success or return;
     if ($args->{delete}) {
         $parent->ensure_deleted($self);
     } else {
         $parent->ensure_trashed($self);
     }
+    return 1;
 }
 
 __PACKAGE__->meta->make_immutable;

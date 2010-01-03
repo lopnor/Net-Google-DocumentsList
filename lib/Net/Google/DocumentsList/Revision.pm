@@ -5,6 +5,7 @@ use Net::Google::DataAPI;
 with 'Net::Google::DataAPI::Role::Entry';
 
 entry_has 'edited' => ( tagname => 'edited', ns => 'app', is => 'ro' );
+entry_has 'updated' => ( tagname => 'updated', is => 'ro' );
 
 feedurl item => (
     is => 'ro',

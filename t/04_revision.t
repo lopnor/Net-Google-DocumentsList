@@ -11,10 +11,15 @@ my $d = $service->add_item(
 );
 ok $d->title($d->title . ' - modified');
 ok my @rev = $d->revisions;
+is scalar @rev, 2;
 
 for (@rev) {
-    warn $_->atom->as_xml;
-    ok $_->content_url, $_->content_url;
+    ok $_->item_feedurl, "url is " . $_->item_feedurl;
+    ok $_->title, "title is " . $_->title;
+    ok $_->edited, "edited at ". $_->edited;
+    ok $_->updated, "updated at ". $_->updated;
+    ok $_->author->name, "author name is ". $_->author->name;
+    ok eval { $_->export({format => 'txt'}) };
 }
 
 $d->delete({delete => 'true'});

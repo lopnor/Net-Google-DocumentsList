@@ -4,7 +4,6 @@ use Test::More;
 ok my $service = service();
 
 for my $kind (qw(document spreadsheet presentation)) {
-    diag "testing $kind";
     my $title = join('-', 'test for N::G::DL', scalar localtime);
 
     ok my $d = $service->add_item(

@@ -77,7 +77,7 @@ sub add_folder {
     my ($self, $args) = @_;
     return $self->add_item(
         {
-            %$args,
+            %{$args || {}},
             kind => 'folder',
         }
     );
@@ -87,7 +87,7 @@ sub folders {
     my ($self, $args) = @_;
     return $self->items(
         {
-            %$args,
+            %{$args || {}},
             category => 'folder',
         }
     );

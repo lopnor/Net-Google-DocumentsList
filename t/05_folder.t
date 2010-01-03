@@ -54,7 +54,6 @@ is $found->id, $folder->id;
     );
     is $moved_doc->id, $doc->id;
 
-    diag 'moving doc out of subfolder';
     $moved_doc->move_out_of($found_subfolder);
 
     ok ! $found_subfolder->item(
@@ -82,7 +81,6 @@ is $found->id, $folder->id;
         }
     );
 }
-diag 'deleting folder';
 $found->delete({delete => 'ture'});
 ok ! $service->item(
     {

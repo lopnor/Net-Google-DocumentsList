@@ -32,7 +32,7 @@ sub _build_auth {
     my $authsub = Net::Google::AuthSub->new(
         source => $self->source,
         service => 'writely',
-        account_type => $self->account_type,
+        accountType => $self->account_type,
     );
     my $res = $authsub->login( $self->username, $self->password );
     unless ($res && $res->is_success) {
@@ -45,7 +45,7 @@ sub _build_auth {
 
 feedurl item => (
     entry_class => 'Net::Google::DocumentsList::Item',
-    default => 'http://docs.google.com/feeds/default/private/full',
+    default => 'https://docs.google.com/feeds/default/private/full',
     is => 'ro',
 );
 
