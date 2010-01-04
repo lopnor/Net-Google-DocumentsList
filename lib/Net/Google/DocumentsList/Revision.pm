@@ -65,9 +65,9 @@ This module represents revision object for Google Documents List Data API
 
 =head1 METHODS
 
-=head2 export ( implemented in Net::Google::DocumentsList::Role::Exportable )
+=head2 export ( implemented in L<Net::Google::DocumentsList::Role::Exportable> )
 
-delete the acl from attached document or folder.
+downloads the revision.
 
 =head1 ATTRIBUTES
 

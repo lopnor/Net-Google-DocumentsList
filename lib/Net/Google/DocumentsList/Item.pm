@@ -226,3 +226,54 @@ sub delete {
 __PACKAGE__->meta->make_immutable;
 
 1;
+__END__
+
+=head1 NAME
+
+Net::Google::DocumentsList::Item - document or folder in Google Documents List Data API
+
+=head1 SYNOPSIS
+
+  use Net::Google::DocumentsList;
+  
+  my $client = Net::Google::DocumentsList->new(
+      username => 'myname@gmail.com',
+      password => 'p4$$w0rd'
+  );
+  
+  # taking one document
+  my $doc = $client->item;
+  
+
+=head1 DESCRIPTION
+
+This module represents document of folder object for Google Documents List Data API.
+
+=head1 METHODS
+
+=head2 export ( implemented in L<Net::Google::DocumentsList::Role::Exportable> )
+
+download the document.
+
+=head1 ATTRIBUTES
+
+=head1 AUTHOR
+
+Noubo Danjou E<lt>nobuo.danjou@gmail.comE<gt>
+
+=head1 SEE ALSO
+
+L<XML::Atom>
+
+L<Net::Google::DataAPI>
+
+L<Net::Google::DocumentsList::Role::Exportable>
+
+L<http://code.google.com/apis/documents/docs/3.0/developers_guide_protocol.html>
+
+=head1 LICENSE
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=cut
