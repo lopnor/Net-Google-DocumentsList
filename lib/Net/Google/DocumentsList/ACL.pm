@@ -86,12 +86,38 @@ Net::Google::DocumentsList::ACL - Access Control List object for Google Document
   # taking one document
   my $doc = $client->item;
 
-  # getting revisions
-  my @revisions = $doc->revisions;
+  # getting acls
+  my @acls = $doc->acls;
 
-  for my $rev (@revisions) {
-      if $rev->updated
+  for my $acl (@acls) {
+      # checking acl
+      if (
+          $acl->role eq 'writer'
+          && $acl->scope->{type} eq 'user'
+          && $acl->scope->{value} eq 'foo.bar@gmail.com'
+      ) {
+          # updating acl
+          $acl->role('reader');
+          $acl->scope(
+            {
+                type => 'user',
+                value => 'someone.else@gmail.com',
+            }
+          );
+
+          # deleting acl
+          $acl->delete;
+      }
   }
+
+  # adding acl
+  $doc->add_acl(
+    role => 'reader',
+    scope => {
+        type => 'user',
+        value => 'foo.bar@gmail.com',
+    }
+  );
 
 =head1 DESCRIPTION
 
