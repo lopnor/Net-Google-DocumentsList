@@ -85,10 +85,12 @@ sub add_folder {
 
 sub folders {
     my ($self, $args) = @_;
+    my $cat = delete $args->{category} || [];
+    $cat = [ $cat ] unless ref $cat;
     return $self->items(
         {
             %{$args || {}},
-            category => 'folder',
+            category => [ 'folder', @$cat ],
         }
     );
 }
@@ -99,3 +101,135 @@ sub folder {
 }
 
 1;
+__END__
+
+=head1 NAME
+
+Net::Google::DocumentsList::Role::HasItem - item CRUD implementation
+
+=head1 SYNOPSIS
+
+  use Net::Google::DocumentsList;
+
+  my $service = Net::Google::DocumentsList->new(
+    username => 'myname@gmail.com',
+    password => 'p4$$w0rd'
+  );
+
+  # add a document to the root directory of your docs.
+  my $doc = $service->add_item(
+    {
+        title => 'my document',
+        kind  => 'document',
+    }
+  );
+
+  # add a folder to the root directory of your docs.
+  my $folder = $service->add_folder(
+    {
+        title => 'my folder',
+    }
+  );
+
+  # add a spreadsheet to a directory
+  my $spreadsheet = $folder->add_item(
+    {
+        title => 'my spreadsheet',
+        kind  => 'spreadsheet',
+    }
+  );
+  
+
+=head1 DESCRIPTION
+
+This module implements item CRUD for Google Documents List Data API.
+
+=head1 METHODS
+
+=head2 add_item
+
+creates specified file or folder.
+
+  my $file = $client->add_item(
+    {
+        title => 'my document',
+        kind  => 'document',
+    }
+  );
+
+available values for 'kind' are 'document', 'folder', 'pdf', 'presentation',
+'spreadsheet', and 'form'.
+
+You can also upload file:
+
+  my $uploaded = $client->add_item(
+    {
+        title => 'uploaded file',
+        file  => '/path/to/my/presentation.ppt',
+    }
+  );
+
+=head2 items
+
+searches items like this:
+
+  my @items = $client->items(
+    {
+        'title' => 'my document',
+        'title-exact' => 'true',
+        'category' => 'document',
+    }
+  );
+
+  my @not_viewed_and_starred_presentation = $client->items(
+    {
+        'category' => ['-viewed','starred','presentation'],
+    }
+  );
+
+You can specify query with hashref and specify categories in 'category' key.
+See L<http://code.google.com/intl/en/apis/documents/docs/3.0/developers_guide_protocol.html#SearchingDocs> for details.
+
+=head2 item
+
+returns the first item found by items method.
+
+=head2 add_folder
+
+shortcut for add_item({kind => 'folder'}).
+
+  my $new_folder = $client->add_folder( { title => 'new_folder' } );
+
+is equivalent to 
+
+  my $new_folder = $client->add_item( 
+      { 
+          title => 'new_folder',
+          kind  => 'folder',
+      } 
+  );
+
+=head2 folders
+
+shortcut for items({category => 'folder'}).
+
+=head2 folder
+
+returns the first folder found by folders method.
+
+=head1 AUTHOR
+
+Noubo Danjou E<lt>nobuo.danjou@gmail.comE<gt>
+
+=head1 SEE ALSO
+
+L<Net::Google::DocumentsList>
+
+L<Net::Google::DataAPI>
+
+=head1 LICENSE
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=cut

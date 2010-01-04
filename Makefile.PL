@@ -7,12 +7,13 @@ requires_any_moose(
     moose => '0.56',
     mouse => '0.40',
 );
-requires 'Net::Google::DataAPI' => '0.10';
+requires 'Net::Google::DataAPI' => '0.12';
 requires 'namespace::autoclean';
 requires 'XML::Atom';
 requires 'File::Slurp';
 requires 'MIME::Types';
 requires 'URI';
+requires 'DateTime::Format::Atom';
 
 tests 't/*.t';
 author_tests 'xt';

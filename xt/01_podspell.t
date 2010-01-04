@@ -9,3 +9,5 @@ Noubo Danjou
 nobuo.danjou@gmail.com
 Net::Google::DocumentsList
 API
+acl
+pdf

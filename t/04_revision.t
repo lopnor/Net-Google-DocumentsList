@@ -16,7 +16,6 @@ is scalar @rev, 2;
 for (@rev) {
     ok $_->item_feedurl, "url is " . $_->item_feedurl;
     ok $_->title, "title is " . $_->title;
-    ok $_->edited, "edited at ". $_->edited;
     ok $_->updated, "updated at ". $_->updated;
     ok $_->author->name, "author name is ". $_->author->name;
     ok eval { $_->export({format => 'txt'}) };

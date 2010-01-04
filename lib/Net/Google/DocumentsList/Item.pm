@@ -53,6 +53,7 @@ feedurl 'revision' => (
         return $self->_get_feedlink('http://schemas.google.com/docs/2007/revisions');
     },
     entry_class => 'Net::Google::DocumentsList::Revision',
+    can_add => 0,
 );
 
 entry_has 'published' => ( tagname => 'published', is => 'ro' );

@@ -61,7 +61,7 @@ Net::Google::DocumentsList - Perl interface to Google Documents List Data API
 
   use Net::Google::DocumentsList;
 
-  my $service = Net::Google::DocumentsList->new(
+  my $client = Net::Google::DocumentsList->new(
     username => 'myname@gmail.com',
     password => 'p4$$w0rd'
   );
@@ -69,7 +69,47 @@ Net::Google::DocumentsList - Perl interface to Google Documents List Data API
 
 =head1 DESCRIPTION
 
-Net::Google::DocumentsList is a Perl interface to Google Documents List Data API.
+Net::Google::DocumentsList is a Perl interface to Google Documents List Data 
+API.
+
+=head1 METHODS
+
+=head2 new
+
+creates Google Documents List Data API client.
+
+  my $clinet = Net::Google::DocumentsList->new(
+    username => 'foo.bar@gmail.com',
+    password => 'p4ssw0rd',
+    source   => 'MyClient', 
+        # optional, default is 'Net::Google::DocumentsList'
+    account_type => 'GOOGLE',
+        # optional, default is 'HOSTED_OR_GOOGLE'
+  );
+
+You can set alternative authorization module like this:
+
+  my $oauth = Net::Google::DataAPI::Auth::OAuth->new(...);
+  my $client = Net::Google::DocumentsList->new(
+    auth => $oauth,
+  );
+
+Make sure Documents List Data API would need those scopes:
+
+=over 2
+
+=item * http://docs.google.com/feeds/
+
+=item * http://spreadsheets.google.com/feeds/
+
+=item * http://docs.googleusercontent.com/
+
+=back
+
+=head2 add_item, items, item, add_folder, folders, folder
+
+These methods are implemented in 
+L<Net::Google::DocumentsList::Role::HasItems>.
 
 =head1 AUTHOR
 
@@ -79,7 +119,11 @@ Noubo Danjou E<lt>nobuo.danjou@gmail.comE<gt>
 
 L<XML::Atom>
 
+L<Net::Google::AuthSub>
+
 L<Net::Google::DataAPI>
+
+L<Net::Google::DocumentsList::Role::HasItems>
 
 L<http://code.google.com/apis/documents/docs/3.0/developers_guide_protocol.html>
 
