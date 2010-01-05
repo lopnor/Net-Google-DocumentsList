@@ -1,4 +1,7 @@
 Revision history for Perl extension Net::Google::DocumentsList
 
+0.00_02 Tue Jan 05 22:10:10 2009
+        - fix POD typo (no code changes)
+
 0.00_01 Tue Jan 05 15:14:00 2009
         - first developer release
