@@ -20,8 +20,10 @@ around items => sub {
             $self->item_feedurl. '/',
         );
         my $feed = $self->service->get_feed($uri, $cond);
+        my $class = 'Net::Google::DocumentsList::Item';
+        Any::Moose::load_class($class);
         @items = map {
-            Net::Google::DocumentsList::Item->new(
+            $class->new(
                 $self->can('sync') ? (container => $self) : (service => $self),
                 atom => $_,
             );
@@ -45,7 +47,9 @@ around add_item => sub {
         );
         my $ref = read_file($file, scalar_ref => 1, binmode=>':raw');
         $part->content_ref($ref);
-        my $entry = Net::Google::DocumentsList::Item->new(
+        my $class = 'Net::Google::DocumentsList::Item';
+        Any::Moose::load_class($class);
+        my $entry = $class->new(
             $self->can('sync') ? (container => $self) : (service => $self),
             %$args,
         )->to_atom;
@@ -63,7 +67,7 @@ around add_item => sub {
             }
         );
         $self->sync if $self->can('sync');
-        $item = Net::Google::DocumentsList::Item->new(
+        $item = $class->new(
             $self->can('sync') ? (container => $self) : (service => $self),
             atom => $atom,
         );
