@@ -10,4 +10,7 @@ nobuo.danjou@gmail.com
 Net::Google::DocumentsList
 API
 acl
+acls
 pdf
+ro
+rw

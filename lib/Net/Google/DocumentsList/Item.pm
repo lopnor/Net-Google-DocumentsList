@@ -251,11 +251,99 @@ This module represents document of folder object for Google Documents List Data 
 
 =head1 METHODS
 
-=head2 export ( implemented in L<Net::Google::DocumentsList::Role::Exportable> )
+=head2 add_item, items, item, add_folder, folders, folder
 
-download the document.
+creates or retrieves items. This method works only for the object with 'folder' kind.
+This method is implemented in L<Net::Google::DocumentsList::Role::HasItems>.
+
+=head2 add_acl, acls, acl
+
+creates and gets Access Control List object attached to the object.
+See L<Net::Google::DocumentsList::ACL> for the details.
+
+=head2 revisions, revision
+
+gets revision objects of the object.
+See L<Net::Google::DocumentsList::Revision> for the details.
+
+=head2 update_content
+
+updates the content of the document with specified file.
+
+  my $new_object = $doc->update_content('/path/to/my/new_content.ppt');
+
+=head2 move_to
+
+move the object to specified folder.
+
+  my $client = Net::Google::DocumentsList->new(
+    usernaem => 'foo.bar@gmail.com',
+    password => 'p4ssw0rd',
+  );
+  my $doc = $client->item({title => 'my doc', category => 'document'});
+  my $folder = $client->folder({title => 'my folder'});
+  $doc->move_to($folder);
+
+=head2 move_out_of
+
+move the object out of specified folder.
+
+  my $client = Net::Google::DocumentsList->new(
+    usernaem => 'foo.bar@gmail.com',
+    password => 'p4ssw0rd',
+  );
+  my $folder = $client->folder({title => 'my folder'});
+  my $doc = $folder->item({title => 'my doc', category => 'document'});
+  $doc->move_out_of($folder);
+
+=head2 delete
+
+deletes the object.
+
+  my $client = Net::Google::DocumentsList->new(
+    usernaem => 'foo.bar@gmail.com',
+    password => 'p4ssw0rd',
+  );
+  my $doc = $client->item({title => 'my doc', category => 'document'});
+
+  $doc->delete; # goes to trash
+
+If you set delete argument to true, the object will be deleted completely.
+
+  $doc->delete({delete => 1}); # deletes completely
+
+=head2 export 
+
+downloads the document. This method doesn't work for the object whose kind is 'folder'.
+This method is implemented in L<Net::Google::DocumentsList::Role::Exportable>.
+
+B<THIS METHOD DOES NOT WORK CORRECTLY IN MY ENVIRONMENT!>
 
 =head1 ATTRIBUTES
+
+you can get and set (if it is rw) these attributes in a moose way.
+
+=over 2
+
+=item * title (rw)
+
+=item * kind (ro)
+
+=item * published (ro)
+
+=item * updated (ro)
+
+=item * edited (ro)
+
+=item * resource_id (ro)
+
+=item * last_viewed (ro)
+
+=item * deleted (ro)
+
+=item * parent (ro)
+
+=back
 
 =head1 AUTHOR
 

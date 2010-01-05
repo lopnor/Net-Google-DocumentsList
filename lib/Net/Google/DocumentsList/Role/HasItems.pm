@@ -20,7 +20,7 @@ around items => sub {
             $self->item_feedurl. '/',
         );
         my $feed = $self->service->get_feed($uri, $cond);
-        my $class = 'Net::Google::DocumentsList::Item';
+        my $class = $self->item_entryclass;
         Any::Moose::load_class($class);
         @items = map {
             $class->new(
@@ -47,7 +47,7 @@ around add_item => sub {
         );
         my $ref = read_file($file, scalar_ref => 1, binmode=>':raw');
         $part->content_ref($ref);
-        my $class = 'Net::Google::DocumentsList::Item';
+        my $class = $self->item_entryclass;
         Any::Moose::load_class($class);
         my $entry = $class->new(
             $self->can('sync') ? (container => $self) : (service => $self),
