@@ -109,7 +109,7 @@ __END__
 
 =head1 NAME
 
-Net::Google::DocumentsList::Role::HasItem - item CRUD implementation
+Net::Google::DocumentsList::Role::HasItems - item CRUD implementation
 
 =head1 SYNOPSIS
 
