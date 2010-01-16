@@ -25,7 +25,7 @@ is $doc->title, $title;
 {
     my $latest = [ sort {$b->updated <=> $a->updated} $doc->revisions ]->[0];
     is $latest->publish_auto, 0;
-    ok $latest->publish_auto(1);
+    $latest->publish_auto(1);
 }
 {
     my $latest = [ sort {$b->updated <=> $a->updated} $doc->revisions ]->[0];

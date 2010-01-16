@@ -3,6 +3,7 @@ use Any::Moose '::Role';
 
 sub update {
     my ($self) = @_;
+    $self->atom or return;
     # put without etag!
     my $atom = $self->service->request(
         {

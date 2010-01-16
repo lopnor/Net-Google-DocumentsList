@@ -7,6 +7,7 @@ with 'Net::Google::DataAPI::Role::Entry',
 use XML::Atom::Util qw(nodelist first);
 use Carp;
 use URI::Escape;
+use File::Slurp;
 
 feedurl item => (
     is => 'ro',
