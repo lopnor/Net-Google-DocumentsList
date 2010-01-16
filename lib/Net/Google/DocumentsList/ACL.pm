@@ -4,7 +4,8 @@ use namespace::autoclean;
 use Net::Google::DataAPI;
 use XML::Atom::Util qw(first);
 use Net::Google::DocumentsList::Types;
-with 'Net::Google::DataAPI::Role::Entry';
+with 'Net::Google::DataAPI::Role::Entry' => {excludes => ['update']},
+    'Net::Google::DocumentsList::Role::UpdateWithoutEtag';
 
 entry_has 'updated' => ( tagname => 'updated', is => 'ro' );
 entry_has 'role' => (
@@ -34,23 +35,6 @@ entry_has 'scope' => (
         $atom->set($self->ns('gAcl'),'scope', '', $self->scope);
     },
 );
-
-sub update {
-    my ($self) = @_;
-    $self->etag or return;
-    # put without etag!
-    my $atom = $self->service->request(
-        {
-            method => 'PUT',
-            uri => $self->editurl,
-            content => $self->to_atom->as_xml,
-            content_type => 'application/atom+xml',
-            response_object => 'XML::Atom::Entry',
-        }
-    );
-    $self->container->sync;
-    $self->atom($atom);
-}
 
 sub delete {
     my ($self) = @_;

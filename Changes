@@ -1,5 +1,12 @@
 Revision history for Perl extension Net::Google::DocumentsList
 
+0.01    Sat Jan 16 14:30:00 2010
+        - now export works
+        - support for publishing revision
+        - support for translation
+        - support for copying items
+        - support for uploading items with convert=false (not tested)
+
 0.00_02 Tue Jan 05 22:10:10 2009
         - fix POD typo (no code changes)
 

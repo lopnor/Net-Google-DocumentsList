@@ -67,17 +67,11 @@ Net::Google::DocumentsList::Role::Exportable - implementation of download items
 
 This module implements download functionality.
 
-=head1 CAVEATS
-
-B<THIS METHOD IS NOT FINISHED IMPLEMENTATION! THIS DOES NOT WORK YET!>
-
 =head1 METHODS
 
 =head2 export
 
 downloads the item. available formats are seen in L<http://code.google.com/intl/en/apis/documents/docs/3.0/developers_guide_protocol.html#DownloadingDocs>.
-
-B<THIS METHOD DOES NOT WORK IN MY ENVIRONMENT YET!>
 
 =head1 AUTHOR
 

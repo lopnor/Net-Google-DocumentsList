@@ -12,5 +12,7 @@ API
 acl
 acls
 pdf
+PDFs
+Apps
 ro
 rw

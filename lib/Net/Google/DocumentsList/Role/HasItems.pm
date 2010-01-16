@@ -42,6 +42,12 @@ around add_item => sub {
     my $item;
     if (my $file = delete $args->{file}) {
         -r $file or confess "File $file does not exist";
+
+        my $convert = delete $args->{convert} || 'true';
+
+        my $source_lang = delete $args->{source_language};
+        my $target_lang = delete $args->{target_language};
+
         my $part = HTTP::Message->new(
             ['Content-Type' => MIME::Types->new->mimeTypeOf($file)->type]
         );
@@ -53,9 +59,15 @@ around add_item => sub {
             $self->can('sync') ? (container => $self) : (service => $self),
             %$args,
         )->to_atom;
+
         my $atom = $self->service->request(
             {  
                 uri => $self->item_feedurl,
+                query => {
+                    $convert eq 'false' ? (convert =>  'false') : (),
+                    $source_lang ? (sourceLanguage => $source_lang) : (),
+                    $target_lang ? (targetLanguage => $target_lang) : (),
+                },
                 parts => [
                     HTTP::Message->new(
                         ['Content-Type' => 'application/atom+xml'],
@@ -170,6 +182,17 @@ You can also upload file:
     {
         title => 'uploaded file',
         file  => '/path/to/my/presentation.ppt',
+    }
+  );
+
+To translate the file specify source_language and target_language:
+
+  my $uploaded = $client->add_item(
+    {
+        title => 'uploaded file',
+        file  => '/path/to/my/presentation.ppt',
+        source_language => 'ja',
+        target_language => 'en',
     }
   );
 

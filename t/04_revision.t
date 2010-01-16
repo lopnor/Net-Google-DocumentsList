@@ -18,10 +18,7 @@ for (@rev) {
     ok $_->title, "title is " . $_->title;
     ok $_->updated, "updated at ". $_->updated;
     ok $_->author->name, "author name is ". $_->author->name;
-    TODO: {
-        local $TODO = 'http://code.google.com/p/gdata-issues/issues/detail?id=1756';
-        ok eval { $_->export({format => 'txt'}) };
-    }
+    ok $_->export({format => 'txt'});
 }
 
 $d->delete({delete => 'true'});

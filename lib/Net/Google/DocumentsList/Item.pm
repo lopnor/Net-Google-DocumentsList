@@ -8,8 +8,6 @@ use XML::Atom::Util qw(nodelist first);
 use Carp;
 use URI::Escape;
 
-our $SLEEP = 5;
-
 feedurl item => (
     is => 'ro',
     as_content_src => 1,
@@ -38,6 +36,20 @@ entry_has 'kind' => (
 
 with 'Net::Google::DocumentsList::Role::HasItems',
     'Net::Google::DocumentsList::Role::Exportable';
+
+for my $label (qw(starred viewed hidden mine private trashed)) {
+    entry_has $label => (
+        is => 'ro',
+        isa => 'Bool',
+        from_atom => sub {
+            my ($self, $atom) = @_;
+            grep {
+                ($_->scheme eq 'http://schemas.google.com/g/2005/labels')
+                && ($_->label eq $label)
+            } $atom->categories;
+        },
+    );
+}
 
 feedurl 'acl' => (
     from_atom => sub {
@@ -177,6 +189,39 @@ sub move_out_of {
     }
 }
 
+sub copy {
+    my ($self, $new_title) = @_;
+
+    $new_title or confess 'new title not specified';
+    grep {$_ eq $self->kind} qw(document spreadsheet presentation)
+        or confess 'This kind of item can not be copied';
+
+    my $target = (ref $self)->new(
+        {
+            service => $self->service,
+            title => $new_title,
+        }
+    )->to_atom;
+    $target->id($self->id);
+    
+    my $atom = $self->service->request(
+        {
+            method => 'POST',
+            content_type => 'application/atom+xml',            
+            uri => $self->service->item_feedurl,
+            content => $target->as_xml,
+            response_object => 'XML::Atom::Entry',
+        }
+    );
+    my $item = (ref $self)->new(
+        service => $self->service,
+        atom => $atom,
+    );
+    my $updated = $self->service->ensure_listed($item);
+    $self->container->sync if $self->container;
+    return $updated;
+}
+
 sub update {
     my ($self) = @_;
     $self->etag or return;
@@ -296,6 +341,18 @@ move the object out of specified folder.
   my $doc = $folder->item({title => 'my doc', category => 'document'});
   $doc->move_out_of($folder);
 
+=head2 copy
+
+copies the document to a new document. You can copy documents, spreadsheets, 
+and presentations. PDFs or folders is not supported.
+
+  my $client = Net::Google::DocumentsList->new(
+    usernaem => 'foo.bar@gmail.com',
+    password => 'p4ssw0rd',
+  );
+  my $doc = $client->add_item({title => 'my doc', kind => 'document'});
+  my $copied = $doc->copy('copied doc');
+
 =head2 delete
 
 deletes the object.
@@ -316,8 +373,6 @@ If you set delete argument to true, the object will be deleted completely.
 
 downloads the document. This method doesn't work for the object whose kind is 'folder'.
 This method is implemented in L<Net::Google::DocumentsList::Role::Exportable>.
-
-B<THIS METHOD DOES NOT WORK CORRECTLY IN MY ENVIRONMENT!>
 
 =head1 ATTRIBUTES
 

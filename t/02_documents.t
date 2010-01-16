@@ -4,7 +4,7 @@ use Test::More;
 ok my $service = service();
 
 for my $kind (qw(document spreadsheet presentation)) {
-    my $title = join('-', 'test for N::G::DL', scalar localtime);
+    my $title = join('-', 'test for N::G::DL', $kind, scalar localtime);
 
     ok my $d = $service->add_item(
         {
@@ -28,7 +28,7 @@ for my $kind (qw(document spreadsheet presentation)) {
     is $cat_found->etag, $d->etag;
 
     my $updated_title = join('-', 'update title', scalar localtime);
-    my $old_etag = $d->etag;
+    ok my $old_etag = $d->etag;
     ok $d->title($updated_title);
     is $d->title, $updated_title;
     isnt $d->etag, $old_etag;
@@ -38,7 +38,7 @@ for my $kind (qw(document spreadsheet presentation)) {
     is $updated->id, $d->id;
     is $updated->etag, $d->etag;
 
-    $d->delete;
+    ok $d->delete;
 
     ok my $d1 = $service->item({title => $updated_title, 'title-exact' => 'true'});
     is $d1->deleted, 1;
@@ -51,7 +51,7 @@ for my $kind (qw(document spreadsheet presentation)) {
         }
     ), 'find trashed item';
 
-    $trashed->delete({delete => 1});
+    ok $trashed->delete({delete => 1});
     ok ! $service->item(
         {
             title => $updated_title, 

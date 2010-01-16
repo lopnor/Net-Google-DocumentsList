@@ -17,31 +17,29 @@ ok my $doc = $service->add_item(
         file => 't/data/foobar.txt',
     }
 );
-TODO: {
-    local $TODO = 'http://code.google.com/p/gdata-issues/issues/detail?id=1756';
-    my $file = File::Temp->new;
-
-    ok eval {
-        $doc->export(
-            {
-                format => 'txt',
-                file => $file,
-            }
-        )
-    };
-    close $file;
-    open my $fh, "<:via(File::BOM)", $file->filename;
-    my $content = do {local $/; <$fh>};
-    is $content, "foobar";
+is $doc->title, $title;
+{
+    ok my $found = $service->item({title => $title});
 }
+my $file = File::Temp->new;
+
+ok eval {
+    $doc->export(
+        {
+            format => 'txt',
+            file => $file,
+        }
+    )
+};
+close $file;
+open my $fh, "<:via(File::BOM)", $file->filename;
+my $content = do {local $/; <$fh>};
+is $content, "foobar";
 
 ok $doc->update_content('t/data/hogefuga.txt');
 
-TODO: {
-    local $TODO = 'http://code.google.com/p/gdata-issues/issues/detail?id=1756';
-    ok my $export = eval { $doc->export({format => 'txt'}) };
-    is Encode::encode('utf-8', $export), $bom.'hogefuga';
-}
+ok my $export = eval { $doc->export({format => 'txt'}) };
+is Encode::encode('utf-8', $export), $bom.'hogefuga';
 
 ok $doc->delete({delete => 'true'});
 

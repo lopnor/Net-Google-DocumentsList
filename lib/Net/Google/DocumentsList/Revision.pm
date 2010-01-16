@@ -3,7 +3,10 @@ use Any::Moose;
 use Net::Google::DocumentsList::Types;
 use namespace::autoclean;
 use Net::Google::DataAPI;
-with 'Net::Google::DataAPI::Role::Entry';
+use XML::Atom::Util qw(first);
+use String::CamelCase qw(camelize);
+with 'Net::Google::DataAPI::Role::Entry' => {excludes => ['update']},
+    'Net::Google::DocumentsList::Role::UpdateWithoutEtag';
 
 entry_has 'updated' => ( 
     is => 'ro',
@@ -19,6 +22,35 @@ feedurl item => (
 );
 
 has 'kind' => (is => 'ro', isa => 'Str', default => 'revision');
+
+for my $attr (qw(publish publish_auto publish_outside_domain)) {
+    my $tag = lcfirst camelize($attr);
+    entry_has $attr => (
+        is => 'rw',
+        isa => 'Bool',
+        default => sub {0},
+        from_atom => sub {
+            my ($self, $atom) = @_;
+            my $elem = first($atom->elem, $self->ns('docs')->{uri}, $tag) or return 0;
+            return $elem->getAttribute('value') eq "true" ? 1 : 0;
+        },
+        to_atom => sub {
+            my ($self, $atom) = @_;
+            $atom->set($self->ns('docs'),$tag, '', {value => $self->$attr ? "true" : "false"});
+        }
+    );
+}
+
+entry_has publish_url => (
+    is => 'ro',
+    from_atom => sub {
+        my ($self, $atom) = @_;
+        my ($url) = grep {
+            $_->rel eq 'http://schemas.google.com/docs/2007#publish'
+        } $atom->link or return;
+        return $url->href;
+    }
+);
 
 with 'Net::Google::DocumentsList::Role::Exportable';
 
@@ -70,6 +102,22 @@ This module represents revision object for Google Documents List Data API
 downloads the revision.
 
 =head1 ATTRIBUTES
+
+=head2 publish
+
+sets and gets whether if this revision is published or not.
+
+=head2 publish_auto
+
+sets and gets whether if new revision will be published automatically or not.
+
+=head2 publish_outside_domain
+
+sets and gets whether if this revision will be published to outside of the Google Apps domain.
+
+=head2 publish_url
+
+the published URL for this document.
 
 =head2 updated
 
