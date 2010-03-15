@@ -5,7 +5,7 @@ use Net::Google::DataAPI;
 use Net::Google::DataAPI::Auth::ClientLogin::Multiple;
 use 5.008001;
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 with 'Net::Google::DataAPI::Role::Service';
 

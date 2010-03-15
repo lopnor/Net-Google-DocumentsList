@@ -5,9 +5,9 @@ all_from 'lib/Net/Google/DocumentsList.pm';
 # requires '';
 requires_any_moose(
     moose => '0.56',
-    mouse => '0.40',
+    mouse => '0.51',
 );
-requires 'Net::Google::DataAPI' => '0.15';
+requires 'Net::Google::DataAPI' => '0.17';
 requires 'namespace::autoclean';
 requires 'XML::Atom';
 requires 'File::Slurp';
