@@ -97,6 +97,19 @@ entry_has 'parent' => (
     }
 );
 
+entry_has 'alternate' => (
+    is => 'ro',
+    isa => 'Str',
+    from_atom => sub {
+        my ($self, $atom) = @_;
+        my ($alt) = 
+            map {$_->href}
+            grep {$_->rel eq 'alternate' && $_->type eq 'text/html'}
+            $atom->link;
+        return $alt;
+    }
+);
+
 sub _url_with_resource_id {
     my ($self) = @_;
     join('/', $self->service->item_feedurl, uri_escape $self->resource_id);
@@ -386,6 +399,10 @@ you can get and set (if it is rw) these attributes in a moose way.
 =item * title (rw)
 
 =item * kind (ro)
+
+=item * alternate (ro)
+
+You can view the item from the web browser with the url associated with this attribute.
 
 =item * published (ro)
 

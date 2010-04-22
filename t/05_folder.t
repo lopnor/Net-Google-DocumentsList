@@ -19,6 +19,7 @@ ok my $found = $service->item(
     },
 );
 is $found->id, $folder->id;
+like $found->alternate, qr{^https?://.+\.google\.com/}, $found->alternate;
 
 {
     my $subfolder_title = join(' - ', 'test for subfolder', scalar localtime);

@@ -1,5 +1,8 @@
 Revision history for Perl extension Net::Google::DocumentsList
 
+0.04    Thu Apr 22 19:00:00 2010
+        - added alternate attribute on item.
+
 0.03    Thu Apr 22 17:30:00 2010
         - added root_items method to get items in 'root folder'.
         - added resource_id parameter for items method.

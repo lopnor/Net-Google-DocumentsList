@@ -14,6 +14,7 @@ for my $kind (qw(document spreadsheet presentation)) {
     );
 
     ok my $found = $service->item({title => $title, 'title-exact' => 'true'});
+    like $found->alternate, qr{^https?://.+\.google\.com/}, $found->alternate;
     is $found->id, $d->id;
     is $found->etag, $d->etag;
 
