@@ -122,6 +122,7 @@ sub update_content {
     );
     my $ref = read_file($file, scalar_ref => 1, binmode=>':raw');
     $part->content_ref($ref);
+    $self->sync;
     my $atom = $self->service->request(
         {
             method => 'PUT',
@@ -246,6 +247,7 @@ sub update {
 sub delete {
     my ($self, $args) = @_;
 
+    $self->sync;
     my $parent = $self->container || $self->service;
 
     my $selfurl = $self->container ? $self->_url_with_resource_id : $self->selfurl;

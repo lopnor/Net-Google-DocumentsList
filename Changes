@@ -1,5 +1,10 @@
 Revision history for Perl extension Net::Google::DocumentsList
 
+0.03    Thu Apr 22 17:30:00 2010
+        - added root_items method to get items in 'root folder'.
+        - added resource_id parameter for items method.
+        - added fail-safe logics on delete and update method.
+
 0.02    Mon Mar 15 23:22:00 2010
         - Update dependencies (Mouse 0.51, Net::Google::DataAPI 0.17)
 

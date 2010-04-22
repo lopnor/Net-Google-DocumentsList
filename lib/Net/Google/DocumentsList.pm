@@ -5,7 +5,7 @@ use Net::Google::DataAPI;
 use Net::Google::DataAPI::Auth::ClientLogin::Multiple;
 use 5.008001;
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 with 'Net::Google::DataAPI::Role::Service';
 
@@ -46,7 +46,34 @@ feedurl item => (
     is => 'ro',
 );
 
+feedurl root_item => (
+    entry_class => 'Net::Google::DocumentsList::Item',
+    default => 'https://docs.google.com/feeds/default/private/full/folder%3Aroot/contents',
+    can_add => 0,
+    is => 'ro',
+);
+
 with 'Net::Google::DocumentsList::Role::HasItems';
+
+around root_items => sub {
+    my ($next, $self, $cond) = @_;
+
+    my @items;
+    my $resource_id = delete $cond->{resource_id};
+    if (my $cats = delete $cond->{category}) {
+        $cats = [ "$cats" ] unless ref $cats eq 'ARRAY';
+        @items = $self->items_with_category('root_item', $cats, $cond);
+    } else {
+        @items = $next->($self, $cond);
+    }
+    if ($self->can('sync')) {
+        @items = grep {$_->parent eq $self->_url_with_resource_id} @items;
+    }
+    if ($resource_id) {
+        @items = grep {$_->resource_id eq $resource_id} @items;
+    }
+    @items;
+};
 
 __PACKAGE__->meta->make_immutable;
 
@@ -110,6 +137,13 @@ Make sure Documents List Data API would need those scopes:
 
 These methods are implemented in 
 L<Net::Google::DocumentsList::Role::HasItems>.
+
+=head2 root_items, root_item
+
+These methods gets items on your 'root' directory. 
+parameters are same as 'items' and 'item' methods.
+
+You can not do add_root_item (it's useless). use add_item method instead.
 
 =head1 AUTHOR
 

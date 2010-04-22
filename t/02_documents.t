@@ -17,6 +17,11 @@ for my $kind (qw(document spreadsheet presentation)) {
     is $found->id, $d->id;
     is $found->etag, $d->etag;
 
+    ok my $by_resource_id = $service->item({resource_id => $d->resource_id});
+    is $by_resource_id->id, $d->id;
+    is $by_resource_id->etag, $d->etag;
+    is $by_resource_id->resource_id, $d->resource_id;
+
     ok my $cat_found = $service->item(
         {
             title => $title, 

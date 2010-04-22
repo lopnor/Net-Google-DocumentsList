@@ -13,29 +13,41 @@ around items => sub {
     my ($next, $self, $cond) = @_;
 
     my @items;
+    my $resource_id = delete $cond->{resource_id};
     if (my $cats = delete $cond->{category}) {
         $cats = [ "$cats" ] unless ref $cats eq 'ARRAY';
-        my $uri = URI->new_abs(
-            join('/','-', @$cats),
-            $self->item_feedurl. '/',
-        );
-        my $feed = $self->service->get_feed($uri, $cond);
-        my $class = $self->item_entryclass;
-        Any::Moose::load_class($class);
-        @items = map {
-            $class->new(
-                $self->can('sync') ? (container => $self) : (service => $self),
-                atom => $_,
-            );
-        } $feed->entries;
+        @items = $self->items_with_category('item', $cats, $cond);
     } else {
         @items = $next->($self, $cond);
     }
     if ($self->can('sync')) {
         @items = grep {$_->parent eq $self->_url_with_resource_id} @items;
     }
+    if ($resource_id) {
+        @items = grep {$_->resource_id eq $resource_id} @items;
+    }
     @items;
 };
+
+sub items_with_category {
+    my ($self, $method, $cats, $cond) = @_;
+    my $feedurl = $self->can($method.'_feedurl');
+    my $entryclass = $self->can($method.'_entryclass');
+
+    my $uri = URI->new_abs(
+        join('/','-', @$cats),
+        $feedurl->($self). '/',
+    );
+    my $feed = $self->service->get_feed($uri, $cond);
+    my $class = $entryclass->($self);
+    Any::Moose::load_class($class);
+    return map {
+        $class->new(
+            $self->can('sync') ? (container => $self) : (service => $self),
+            atom => $_,
+        );
+    } $feed->entries;
+}
 
 around add_item => sub {
     my ($next, $self, $args) = @_;
@@ -216,6 +228,12 @@ searches items like this:
 
 You can specify query with hashref and specify categories in 'category' key.
 See L<http://code.google.com/intl/en/apis/documents/docs/3.0/developers_guide_protocol.html#SearchingDocs> for details.
+
+You can also specify resource_id for the query. It naturally returns 0 or 1 item which matches the resource_id. This is useful to work with Net::Google::Spreadsheets:
+
+  my $ss_in_docs = $client->item(
+      {resource_id => 'spreadsheet:'.$ss->key}
+  );
 
 =head2 item
 

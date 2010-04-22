@@ -1,7 +1,7 @@
 package Net::Google::DocumentsList::Role::EnsureListed;
 use Any::Moose '::Role';
 
-our $SLEEP = 2;
+our $SLEEP = 1;
 our $RETRY = 10;
 
 sub ensure_listed {
@@ -9,6 +9,7 @@ sub ensure_listed {
     for (1 .. $RETRY) {
         my @items = $self->item(
             {
+                resource_id => $item->resource_id,
                 title => $item->title,
                 'title-exact' => 'true',
                 category => $item->kind,
@@ -44,6 +45,7 @@ sub ensure_not_listed {
         undef $found;
         my @list = $folder->item(
             {
+                resource_id => $self->resource_id,
                 title => $self->title,
                 'title-exact' => 'true',
                 category => $self->kind,
@@ -61,6 +63,7 @@ sub ensure_trashed {
     for (1 .. $RETRY) {
         my @items = $self->item(
             {
+                resource_id => $item->resource_id,
                 title => $item->title,
                 'title-exact' => 'true',
                 category => [$item->kind, 'trashed'],
@@ -84,6 +87,7 @@ sub ensure_deleted {
     for (1 .. $RETRY) {
         my @items = $self->service->item(
             {
+                resource_id => $item->resource_id,
                 title => $item->title,
                 'title-exact' => 'true',
                 category => $item->kind,
@@ -91,6 +95,7 @@ sub ensure_deleted {
         );
         push @items, $self->service->item(
             {
+                resource_id => $item->resource_id,
                 title => $item->title,
                 'title-exact' => 'true',
                 category => [$item->kind, 'trashed'],

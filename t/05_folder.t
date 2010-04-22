@@ -18,7 +18,6 @@ ok my $found = $service->item(
         category => 'folder',
     },
 );
-
 is $found->id, $folder->id;
 
 {
@@ -88,5 +87,28 @@ ok ! $service->item(
         category => 'folder',
     }
 );
+
+{
+    my $title = join(' - ', 'test for root folder', scalar localtime);
+    ok my $doc = $service->add_item(
+        {
+            title => $title,
+            kind => 'document',
+        }
+    );
+    ok my $found = $service->root_item(
+        {
+            title => $title,
+            'title-exact' => 'true',
+            category => 'document',
+        }
+    );
+    is $found->id, $doc->id;
+
+    ok my @in_root = $service->root_items;
+    ok grep {$_->id eq $doc->id} @in_root;
+    ok $doc->delete({delete => 'true'});
+    ok ! grep {$_->id eq $doc->id} $service->root_items;
+}
 
 done_testing;

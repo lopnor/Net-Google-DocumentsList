@@ -26,6 +26,7 @@ sub import {
     strict->import;
     warnings->import;
     utf8->import;
+    check_env('NET_GOOGLE_DOCUMENTSLIST_LIVE_TEST') or exit;
     {
         no warnings;
         check_use(qw(Config::Pit)) or exit;
