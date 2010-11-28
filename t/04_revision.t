@@ -9,6 +9,7 @@ my $d = $service->add_item(
         kind => 'document',
     }
 );
+ok $d->update_content('t/data/hogefuga.txt');
 ok $d->title($d->title . ' - modified');
 ok my @rev = $d->revisions;
 is scalar @rev, 2;

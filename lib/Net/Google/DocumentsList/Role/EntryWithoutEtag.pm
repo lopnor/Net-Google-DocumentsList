@@ -1,5 +1,6 @@
-package Net::Google::DocumentsList::Role::UpdateWithoutEtag;
+package Net::Google::DocumentsList::Role::EntryWithoutEtag;
 use Any::Moose '::Role';
+with 'Net::Google::DataAPI::Role::Entry' => {-excludes => ['update']};
 
 sub update {
     my ($self) = @_;

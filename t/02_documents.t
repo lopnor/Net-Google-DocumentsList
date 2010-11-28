@@ -3,7 +3,7 @@ use Test::More;
 
 ok my $service = service();
 
-for my $kind (qw(document spreadsheet presentation)) {
+for my $kind (qw(document spreadsheet presentation )) {
     my $title = join('-', 'test for N::G::DL', $kind, scalar localtime);
 
     ok my $d = $service->add_item(
@@ -11,7 +11,7 @@ for my $kind (qw(document spreadsheet presentation)) {
             title => $title,
             kind => $kind,
         }
-    );
+    ), "creating $kind";
 
     ok my $found = $service->item({title => $title, 'title-exact' => 'true'});
     like $found->alternate, qr{^https?://.+\.google\.com/}, $found->alternate;

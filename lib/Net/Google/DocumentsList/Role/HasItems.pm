@@ -208,6 +208,8 @@ To translate the file specify source_language and target_language:
     }
   );
 
+THIS DOESN NOT WORK FOR NOW (2010 NOV 28)
+
 =head2 items
 
 searches items like this:

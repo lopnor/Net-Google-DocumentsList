@@ -1,12 +1,10 @@
 package Net::Google::DocumentsList::Revision;
 use Any::Moose;
 use Net::Google::DocumentsList::Types;
-use namespace::autoclean;
 use Net::Google::DataAPI;
 use XML::Atom::Util qw(first);
 use String::CamelCase qw(camelize);
-with 'Net::Google::DataAPI::Role::Entry' => {excludes => ['update']},
-    'Net::Google::DocumentsList::Role::UpdateWithoutEtag';
+with 'Net::Google::DocumentsList::Role::EntryWithoutEtag';
 
 entry_has 'updated' => ( 
     is => 'ro',
@@ -45,6 +43,8 @@ entry_has publish_url => (
     is => 'ro',
     from_atom => sub {
         my ($self, $atom) = @_;
+        warn $atom->as_xml;
+        warn $_->href for $atom->link;
         my ($url) = grep {
             $_->rel eq 'http://schemas.google.com/docs/2007#publish'
         } $atom->link or return;
@@ -55,6 +55,8 @@ entry_has publish_url => (
 with 'Net::Google::DocumentsList::Role::Exportable';
 
 __PACKAGE__->meta->make_immutable;
+
+no Any::Moose;
 
 1;
 __END__
@@ -117,7 +119,7 @@ sets and gets whether if this revision will be published to outside of the Googl
 
 =head2 publish_url
 
-the published URL for this document.
+the published URL for this document. THIS DOES NOT WORK FOR NOW (2010 NOV 28)
 
 =head2 updated
 

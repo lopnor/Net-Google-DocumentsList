@@ -1,5 +1,10 @@
 Revision history for Perl extension Net::Google::DocumentsList
 
+0.05    Sun Nov 28 19:30:00 2010
+        - fix exporting errors.
+        - publish does not work for now. (due to Google API failure)
+        - tlanslation does not work for now. (due to Google API failure)
+
 0.04    Thu Apr 22 19:00:00 2010
         - added alternate attribute on item.
 

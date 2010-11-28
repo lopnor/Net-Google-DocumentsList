@@ -1,6 +1,5 @@
 package Net::Google::DocumentsList::Item;
 use Any::Moose;
-use namespace::autoclean;
 use Net::Google::DataAPI;
 with 'Net::Google::DataAPI::Role::Entry',
     'Net::Google::DocumentsList::Role::EnsureListed';
@@ -285,6 +284,8 @@ sub delete {
 }
 
 __PACKAGE__->meta->make_immutable;
+
+no Any::Moose;
 
 1;
 __END__

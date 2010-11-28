@@ -1,11 +1,9 @@
 package Net::Google::DocumentsList::ACL;
 use Any::Moose;
-use namespace::autoclean;
 use Net::Google::DataAPI;
 use XML::Atom::Util qw(first);
 use Net::Google::DocumentsList::Types;
-with 'Net::Google::DataAPI::Role::Entry' => {excludes => ['update']},
-    'Net::Google::DocumentsList::Role::UpdateWithoutEtag';
+with 'Net::Google::DocumentsList::Role::EntryWithoutEtag';
 
 entry_has 'updated' => ( tagname => 'updated', is => 'ro' );
 entry_has 'role' => (
@@ -50,6 +48,8 @@ sub delete {
 }
 
 __PACKAGE__->meta->make_immutable;
+
+no Any::Moose;
 
 1;
 __END__

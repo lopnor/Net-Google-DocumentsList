@@ -1,11 +1,10 @@
 package Net::Google::DocumentsList;
 use Any::Moose;
-use namespace::autoclean;
 use Net::Google::DataAPI;
 use Net::Google::DataAPI::Auth::ClientLogin::Multiple;
 use 5.008001;
 
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 
 with 'Net::Google::DataAPI::Role::Service';
 
@@ -34,6 +33,7 @@ sub _build_auth {
         services => {
             'docs.google.com' => 'writely',
             'spreadsheets.google.com' => 'wise',
+            '*docs.googleusercontent.com' => 'writely',
         },
         username => $self->username,
         password => $self->password,
@@ -76,6 +76,8 @@ around root_items => sub {
 };
 
 __PACKAGE__->meta->make_immutable;
+
+no Any::Moose;
 
 1;
 __END__
