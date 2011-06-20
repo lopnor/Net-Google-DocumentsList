@@ -44,10 +44,10 @@ for my $kind (qw(document spreadsheet presentation )) {
     is $updated->id, $d->id;
     is $updated->etag, $d->etag;
 
-    ok $d->delete;
+    ok $d->delete, 'trash';
 
-    ok my $d1 = $service->item({title => $updated_title, 'title-exact' => 'true'});
-    is $d1->deleted, 1;
+#    ok my $d1 = $service->item({title => $updated_title, 'title-exact' => 'true'});
+#    is $d1->deleted, 1;
 
     ok my $trashed = $service->item(
         {
@@ -56,8 +56,9 @@ for my $kind (qw(document spreadsheet presentation )) {
             category => [$kind, 'trashed'],
         }
     ), 'find trashed item';
+    is $trashed->deleted, 1;
 
-    ok $trashed->delete({delete => 1});
+    ok $trashed->delete({delete => 1}), 'delete';
     ok ! $service->item(
         {
             title => $updated_title, 

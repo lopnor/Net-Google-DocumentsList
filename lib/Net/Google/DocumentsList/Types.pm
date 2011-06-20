@@ -7,9 +7,9 @@ subtype 'Net::Google::DocumentsList::Types::ACL::Scope'
     => as 'HashRef'
     => where {
         my $args = shift;
-        scalar keys %$args == 2 &&
-        defined $args->{type} &&
-        defined $args->{value};
+#        scalar keys %$args == 2 &&
+        defined $args->{type};
+#        defined $args->{value};
     };
 
 subtype 'Net::Google::DocumentsList::Types::DateTime'

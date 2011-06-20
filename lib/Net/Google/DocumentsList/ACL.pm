@@ -1,7 +1,7 @@
 package Net::Google::DocumentsList::ACL;
 use Any::Moose;
 use Net::Google::DataAPI;
-use XML::Atom::Util qw(first);
+use XML::Atom::Util qw(first create_element);
 use Net::Google::DocumentsList::Types;
 with 'Net::Google::DocumentsList::Role::EntryWithoutEtag';
 
@@ -14,7 +14,16 @@ entry_has 'role' => (
     },
     to_atom => sub {
         my ($self, $atom) = @_;
-        $atom->set($self->ns('gAcl'),'role', '', {value => $self->role});
+        if (my $key = $self->withKey) {
+            my $role = create_element($self->ns('gAcl')->{uri}, 'role');
+            $role->setAttribute(value => $self->role);
+            my $withKey = create_element($self->ns('gAcl')->{uri}, 'withKey');
+            $withKey->setAttribute(key => $key);
+            $withKey->appendChild($role);
+            $atom->set($self->ns('gAcl')->{uri}, 'withKey', $withKey);
+        } else {
+            $atom->set($self->ns('gAcl'),'role', '', {value => $self->role});
+        }
     }
 );
 entry_has 'scope' => (
@@ -23,14 +32,26 @@ entry_has 'scope' => (
     from_atom => sub {
         my ($self, $atom) = @_;
         my $elem = first($atom->elem, $self->ns('gAcl')->{uri}, 'scope');
-        return {
-            value => $elem->getAttribute('value'),
+        my $obj = {
             type  => $elem->getAttribute('type'),
         };
+        if (my $value = $elem->getAttribute('value')) {
+            $obj->{value} = $value;
+        }
+        return $obj;
     },
     to_atom => sub {
         my ($self, $atom) = @_;
         $atom->set($self->ns('gAcl'),'scope', '', $self->scope);
+    },
+);
+entry_has 'withKey' => (
+    is => 'ro',
+    from_atom => sub {
+        my ($self, $atom) = @_;
+        if (my $elem = first($atom->elem, $self->ns('gAcl')->{uri}, 'withKey')) {
+            $elem->getAttribute('key')
+        }
     },
 );
 
