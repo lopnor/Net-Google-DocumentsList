@@ -117,12 +117,28 @@ Net::Google::DocumentsList::ACL - Access Control List object for Google Document
 
   # adding acl
   $doc->add_acl(
-    role => 'reader',
-    scope => {
-        type => 'user',
-        value => 'foo.bar@gmail.com',
+    {
+        role => 'reader',
+        scope => {
+            type => 'user',
+            value => 'foo.bar@gmail.com',
+        }
     }
   );
+
+  # adding acl with authorization keys
+  # users who knows the key can write the doc
+  my $acl = $doc->add_acl(
+    {
+        role => 'writer',
+        scope => {
+            type => 'default',
+        },
+        withKey => 1,
+    }
+  );
+  say $acl->withKey; # this will show the key, and google (not you) makes the key
+
 
 =head1 DESCRIPTION
 
@@ -135,10 +151,12 @@ This module represents Access Control List object for Google Documents List Data
 adds new ACL to document or folder.
 
   $doc->add_acl(
-    role => 'reader',
-    scope => {
-        type => 'user',
-        value => 'foo.bar@gmail.com',
+    {
+        role => 'reader',
+        scope => {
+            type => 'user',
+            value => 'foo.bar@gmail.com',
+        }
     }
   );
 
