@@ -1,5 +1,9 @@
 Revision history for Perl extension Net::Google::DocumentsList
 
+0.06    Fri Aug 12 11:10:00 2011
+        - added ACL control with withKey option (thanks to Ray Norrish)
+        - translation seems to work now
+
 0.05    Sun Nov 28 19:30:00 2010
         - fix exporting errors.
         - publish does not work for now. (due to Google API failure)
