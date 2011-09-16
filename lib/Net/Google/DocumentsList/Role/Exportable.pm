@@ -18,6 +18,9 @@ sub export {
                 %{$args || {}},
                 exportFormat => $format,
             },
+            $self->kind eq 'spreadsheet' ? 
+                (sign_host => 'spreadsheets.google.com') 
+                : (),
         }
     );
     if ($res->is_success) {

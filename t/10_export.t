@@ -19,7 +19,7 @@ ok my $service = service();
                 format => $format,
                 file => $target,
             }
-        ), "exporting $format";
+        ), "exporting $format - spreadsheet - ".$spreadsheet->title;
         ok -r $target;
         ok unlink $target;
     }
@@ -42,7 +42,7 @@ ok my $service = service();
                 format => $format,
                 file => $target,
             }
-        ), "exporting $format";
+        ), "exporting $format - doc - ". $doc->title;
         ok -r $target;
         ok unlink $target;
     }
@@ -65,7 +65,7 @@ ok my $service = service();
                 format => $format,
                 file => $target,
             }
-        ), "exporting $format";
+        ), "exporting $format - presentation - ".$presentation->title;
         ok -r $target;
         ok unlink $target;
     }
@@ -88,7 +88,7 @@ ok my $service = service();
                 format => $format,
                 file => $target,
             }
-        ), "exporting $format";
+        ), "exporting $format - pdf - ". $pdf->title;
         ok -r $target;
         ok unlink $target;
     }
