@@ -1,5 +1,8 @@
 Revision history for Perl extension Net::Google::DocumentsList
 
+0.07    Fri Sep 16 14:00:00 2011
+        - fix spreadsheet export error (thanks to tvkids)
+
 0.06    Fri Aug 12 11:10:00 2011
         - added ACL control with withKey option (thanks to Ray Norrish)
         - translation seems to work now
