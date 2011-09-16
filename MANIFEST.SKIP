@@ -3,6 +3,7 @@
 ^MANIFEST\.
 ^Makefile$
 ^MYMETA.yml$
+^MYMETA.json$
 ~$
 ^#
 \.old$
