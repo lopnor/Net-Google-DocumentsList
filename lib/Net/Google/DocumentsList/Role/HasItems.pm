@@ -4,7 +4,7 @@ with 'Net::Google::DocumentsList::Role::EnsureListed';
 use Net::Google::DataAPI;
 use URI;
 use MIME::Types;
-use File::Slurp;
+use File::stat;
 use Carp;
 
 requires 'items', 'item', 'add_item';
@@ -54,42 +54,64 @@ around add_item => sub {
     my $item;
     if (my $file = delete $args->{file}) {
         -r $file or confess "File $file does not exist";
+        my $stat = stat($file) or confess "can not stat file $file";
+        my $size = $stat->size;
 
         my $convert = delete $args->{convert} || 'true';
-
         my $source_lang = delete $args->{source_language};
         my $target_lang = delete $args->{target_language};
 
-        my $part = HTTP::Message->new(
-            ['Content-Type' => MIME::Types->new->mimeTypeOf($file)->type]
-        );
-        my $ref = read_file($file, scalar_ref => 1, binmode=>':raw');
-        $part->content_ref($ref);
+        my $ct = MIME::Types->new->mimeTypeOf($file)->type || 'application/octet-stream';
+        open my $fh, '<:bytes', $file or confess "file $file could not be opened";
+
         my $class = $self->item_entryclass;
         Any::Moose::load_class($class);
         my $entry = $class->new(
             $self->can('sync') ? (container => $self) : (service => $self),
             %$args,
         )->to_atom;
-
-        my $atom = $self->service->request(
+        
+        my ($link) = map {$_->href} 
+                     grep {$_->rel eq 'http://schemas.google.com/g/2005#resumable-create-media'} 
+                     $self->service->get_feed($self->item_feedurl)->link;
+        my $res = $self->service->request(
             {  
-                uri => $self->item_feedurl,
+                uri => $link,
+                content_type => 'application/atom+xml',
+                header => {
+                    'X-Upload-Content-Type' => $ct,
+                    'X-Upload-Content-Length' => $size,
+                },
                 query => {
                     $convert eq 'false' ? (convert =>  'false') : (),
                     $source_lang ? (sourceLanguage => $source_lang) : (),
                     $target_lang ? (targetLanguage => $target_lang) : (),
                 },
-                parts => [
-                    HTTP::Message->new(
-                        ['Content-Type' => 'application/atom+xml'],
-                        $entry->as_xml,
-                    ),
-                    $part,
-                ],
-                response_object => 'XML::Atom::Entry',
+                content => $entry->as_xml,
             }
         );
+        my $atom;
+        if ($res->is_success) {
+            my $uri = $res->header('Location');
+            my $offset = 0;
+            while (my $length = read $fh, my $part, 512*1024) {
+                my $req = HTTP::Request->new(PUT => $uri);
+                $req->content_type($ct);
+                $req->content_length($length);
+                $req->header('Content-Range' => sprintf('bytes %d-%d/%d', $offset, $offset + $length - 1, $size));
+                $req->content($part);
+                my $res = $self->service->request($req);
+                if ($res->code == 201) {
+                    $atom = XML::Atom::Entry->new(\($res->content));
+                    last;
+                } else {
+                    if (my $next = $res->header('Location')) {
+                        $uri = $next;
+                    }
+                }
+                $offset = $offset + $length;
+            }
+        }
         $self->sync if $self->can('sync');
         $item = $class->new(
             $self->can('sync') ? (container => $self) : (service => $self),

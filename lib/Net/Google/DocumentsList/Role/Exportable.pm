@@ -23,6 +23,10 @@ sub export {
                 : (),
         }
     );
+    if ($res->is_redirect) {
+        my $next = $res->header('Location');
+        $res = $self->service->request({uri => $next});
+    }
     if ($res->is_success) {
         if ( $file ) {
             my $content = $res->content_ref;

@@ -6,7 +6,7 @@ with 'Net::Google::DataAPI::Role::Entry',
 use XML::Atom::Util qw(nodelist first);
 use Carp;
 use URI::Escape;
-use File::Slurp;
+use File::stat;
 
 feedurl item => (
     is => 'ro',
@@ -109,6 +109,19 @@ entry_has 'alternate' => (
     }
 );
 
+entry_has 'resumable_edit_media' => (
+    is => 'ro',
+    isa => 'Str',
+    from_atom => sub {
+        my ($self, $atom) = @_;
+        my ($link) = 
+            map {$_->href}
+            grep {$_->rel eq 'http://schemas.google.com/g/2005#resumable-edit-media'}
+            $atom->link;
+        return $link;
+    }
+);
+
 sub _url_with_resource_id {
     my ($self) = @_;
     join('/', $self->service->item_feedurl, uri_escape $self->resource_id);
@@ -129,28 +142,50 @@ sub update_content {
     $self->kind eq 'folder' 
         and confess "You can't update folder content with a file";
     -r $file or confess "File $file does not exist";
-    my $part = HTTP::Message->new(
-        ['Content-Type' => MIME::Types->new->mimeTypeOf($file)->type ]
-    );
-    my $ref = read_file($file, scalar_ref => 1, binmode=>':raw');
-    $part->content_ref($ref);
+    my $stat = stat($file) or confess "can not stat file $file";
+    my $size = $stat->size;
+    my $ct = MIME::Types->new->mimeTypeOf($file)->type || 'application/octet-stream';
+    open my $fh, '<:bytes', $file or confess "file $file could not be opened";
+
     $self->sync;
-    my $atom = $self->service->request(
+    my $res = $self->service->request(
         {
             method => 'PUT',
-            uri => $self->editurl,
-            parts => [
-                HTTP::Message->new(
-                    ['Content-Type' => 'application/atom+xml'],
-                    $self->atom->as_xml,
-                ),
-                $part,
-            ],
-            response_object => 'XML::Atom::Entry',
+            uri => $self->resumable_edit_media,
+            content_type => $ct,
+            header => {
+                'Content-Length' => 0,
+                'X-Upload-Content-Type' => $ct,
+                'X-Upload-Content-Length' => $size,
+                'If-Match' => $self->etag,
+            },
         }
     );
+    my $atom;
+    if ($res->is_success) {
+        my $uri = $res->header('Location');
+        my $offset = 0;
+        while (my $length = read $fh, my $part, 512*1024) {
+            my $req = HTTP::Request->new(PUT => $uri);
+            $req->content_type($ct);
+            $req->content_length($length);
+            $req->header('Content-Range' => sprintf('bytes %d-%d/%d', $offset, $offset + $length - 1, $size));
+            $req->content($part);
+            my $res = $self->service->request($req);
+            if ($res->code == 200) {
+                $atom = XML::Atom::Entry->new(\($res->content));
+                last;
+            } else {
+                if (my $next = $res->header('Location')) {
+                    $uri = $next;
+                }
+            }
+            $offset = $offset + $length;
+        }
+    }
+    my $updated = $self->atom($atom);
     $self->container->sync if $self->container;
-    $self->atom($atom);
+    return $updated;
 }
 
 sub move_to {

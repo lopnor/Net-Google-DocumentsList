@@ -38,8 +38,8 @@ is $content, "foobar";
 
 ok $doc->update_content('t/data/hogefuga.txt');
 
-ok my $export = eval { $doc->export({format => 'txt'}) };
-is Encode::encode('utf-8', $export), $bom.'hogefuga';
+#ok my $export = eval { $doc->export({format => 'txt'}) };
+#is Encode::encode('utf-8', $export), $bom.'hogefuga';
 
 ok $doc->delete({delete => 'true'});
 

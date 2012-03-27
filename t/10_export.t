@@ -58,14 +58,14 @@ ok my $service = service();
         }
     );
 
-    for my $format (qw(pdf png ppt swf txt)) {
+    for my $format (qw(pdf png ppt txt)) { # no swf now?
         my $target = 't/data/export.'.$format;
-        ok $presentation->export(
+        ok eval {$presentation->export(
             {
                 format => $format,
                 file => $target,
             }
-        ), "exporting $format - presentation - ".$presentation->title;
+        )}, "exporting $format - presentation - ".$presentation->title;
         ok -r $target;
         ok unlink $target;
     }
@@ -83,12 +83,12 @@ ok my $service = service();
 
     for my $format (qw(pdf png ppt swf txt)) {
         my $target = 't/data/export.'.$format;
-        ok $pdf->export(
+        ok eval {$pdf->export(
             {
                 format => $format,
                 file => $target,
             }
-        ), "exporting $format - pdf - ". $pdf->title;
+        )}, "exporting $format - pdf - ". $pdf->title;
         ok -r $target;
         ok unlink $target;
     }
