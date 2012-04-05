@@ -180,6 +180,7 @@ sub update_content {
                     $uri = $next;
                 }
             }
+            $self->container->sync if $self->container;
             $offset = $offset + $length;
         }
     }

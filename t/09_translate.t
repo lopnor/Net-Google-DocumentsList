@@ -1,7 +1,7 @@
 use t::Util;
 use Test::More;
 use LWP::Simple;
-plan skip_all => 'does not work for now?';
+plan skip_all => 'does not work with resumable upload for now?';
 
 my $service = service();
 

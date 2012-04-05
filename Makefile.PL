@@ -7,7 +7,7 @@ requires_any_moose(
     moose => '0.56',
     mouse => '0.51',
 );
-requires 'Net::Google::DataAPI' => '0.24';
+requires 'Net::Google::DataAPI' => '0.26';
 requires 'XML::Atom';
 requires 'File::Slurp';
 requires 'MIME::Types';
@@ -15,6 +15,7 @@ requires 'URI';
 requires 'URI::Escape';
 requires 'DateTime::Format::Atom';
 requires 'String::CamelCase' => '0.02';
+requires 'File::stat';
 
 tests 't/*.t';
 author_tests 'xt';

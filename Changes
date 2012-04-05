@@ -1,5 +1,8 @@
 Revision history for Perl extension Net::Google::DocumentsList
 
+0.08    Thu Apr 05 21:45:00 2012
+        - support for resumable upload (thanks to Ray Norrish)
+
 0.07    Fri Sep 16 14:00:00 2011
         - fix spreadsheet export error (thanks to tvkids)
 
