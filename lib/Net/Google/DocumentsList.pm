@@ -2,6 +2,9 @@ package Net::Google::DocumentsList;
 use Any::Moose;
 use Net::Google::DataAPI;
 use Net::Google::DataAPI::Auth::ClientLogin::Multiple;
+use Net::Google::DocumentsList::Metadata;
+use URI;
+use URI::Escape;
 use 5.008001;
 
 our $VERSION = '0.08';
@@ -53,6 +56,13 @@ feedurl root_item => (
     is => 'ro',
 );
 
+feedurl change => (
+    entry_class => 'Net::Google::DocumentsList::Change',
+    default => 'https://docs.google.com/feeds/default/private/changes',
+    can_add => 0,
+    is => 'ro',
+);
+
 with 'Net::Google::DocumentsList::Role::HasItems';
 
 around root_items => sub {
@@ -74,6 +84,21 @@ around root_items => sub {
     }
     @items;
 };
+
+sub metadata {
+    my ($self, $args) = @_;
+    my $uri = URI->new(
+        sprintf("https://docs.google.com/feeds/metadata/%s", 
+            uri_escape_utf8(delete $args->{user_id} || 'default')
+        )
+    );
+    $uri->query_form($args);
+    my $atom = eval {$self->get_entry($uri)} or return;
+    Net::Google::DocumentsList::Metadata->new(
+        atom => $atom,
+        service => $self,
+    );
+}
 
 __PACKAGE__->meta->make_immutable;
 
