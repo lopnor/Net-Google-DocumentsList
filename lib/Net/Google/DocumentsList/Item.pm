@@ -322,7 +322,7 @@ sub delete {
 around 'add_acl' => sub {
     my ($next, $self, $args) = @_;
     if ((delete($args->{send_notification_emails}) || '') eq 'false') {
-        my $feedurl = $self->acl_feedurl . '?send-notification_emails=false';
+        my $feedurl = $self->acl_feedurl . '?send-notification-emails=false';
         my $class = $self->acl_entryclass;
         Any::Moose::load_class($class);
         my $entry = $class->new(
