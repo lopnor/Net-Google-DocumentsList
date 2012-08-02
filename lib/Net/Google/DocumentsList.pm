@@ -7,7 +7,7 @@ use URI;
 use URI::Escape;
 use 5.008001;
 
-our $VERSION = '0.08';
+our $VERSION = '0.09';
 
 with 'Net::Google::DataAPI::Role::Service';
 
@@ -172,9 +172,30 @@ parameters are same as 'items' and 'item' methods.
 
 You can not do add_root_item (it's useless). use add_item method instead.
 
+=head2 metadata
+
+you can get metadata of current logged in user. returned object is Net::Google::DocumentsList::Metadata.
+
+  my $meatadata = Net::Google::DocumentsList->new(...)->metadata;
+
+=head2 changes, change
+
+returns Net::Google::DocumentsList::Change objects with calling 'changes', first item of them with 'change'.
+
+  my $service = Net::Google::DocumentsList->new(...);
+  my $changestamp = $service->metadata->largest_changestamp;
+  my @changes = $service->changes(
+    {
+        'start-index' => $changestamp - 10,
+        'max-results' => 10,
+    }
+  );
+
+You can specify 'start-index', 'max-results' parameters to get fewer changes.
+
 =head1 AUTHOR
 
-Noubo Danjou E<lt>nobuo.danjou@gmail.comE<gt>
+Noubo Danjou E<lt>danjou@soffritto.orgE<gt>
 
 =head1 SEE ALSO
 
