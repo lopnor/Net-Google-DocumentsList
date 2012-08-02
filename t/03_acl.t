@@ -48,6 +48,7 @@ is $acl[0]->scope->{value}, config->{username};
             role => 'writer',
             scope => { type => 'default' },
             withKey => 1,
+            send_notification_emails => 'false',
         }
     );
     is scalar $d->acls, 2;
