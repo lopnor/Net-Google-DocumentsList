@@ -82,7 +82,7 @@ downloads the item. available formats are seen in L<http://code.google.com/intl/
 
 =head1 AUTHOR
 
-Noubo Danjou E<lt>nobuo.danjou@gmail.comE<gt>
+Noubo Danjou E<lt>danjou@soffritto.orgE<gt>
 
 =head1 SEE ALSO
 

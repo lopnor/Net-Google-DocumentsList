@@ -176,7 +176,7 @@ see L<http://code.google.com/intl/en/apis/documents/docs/3.0/developers_guide_pr
 
 =head1 AUTHOR
 
-Noubo Danjou E<lt>nobuo.danjou@gmail.comE<gt>
+Noubo Danjou E<lt>danjou@soffritto.orgE<gt>
 
 =head1 SEE ALSO
 

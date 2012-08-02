@@ -5,7 +5,7 @@ use Net::Google::DataAPI;
 use URI;
 use MIME::Types;
 use File::stat;
-use Carp;
+use Carp 'confess';
 
 requires 'items', 'item', 'add_item';
 
@@ -294,7 +294,7 @@ returns the first folder found by folders method.
 
 =head1 AUTHOR
 
-Noubo Danjou E<lt>nobuo.danjou@gmail.comE<gt>
+Noubo Danjou E<lt>danjou@soffritto.orgE<gt>
 
 =head1 SEE ALSO
 

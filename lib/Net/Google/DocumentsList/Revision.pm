@@ -125,7 +125,7 @@ the published URL for this document. THIS DOES NOT WORK FOR NOW (2010 NOV 28)
 
 =head1 AUTHOR
 
-Noubo Danjou E<lt>nobuo.danjou@gmail.comE<gt>
+Noubo Danjou E<lt>danjou@soffritto.orgE<gt>
 
 =head1 SEE ALSO
 
