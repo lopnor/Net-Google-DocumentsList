@@ -319,6 +319,27 @@ sub delete {
     return 1;
 }
 
+around 'add_acl' => sub {
+    my ($next, $self, $args) = @_;
+    if ((delete($args->{send_notification_emails}) || '') eq 'false') {
+        my $feedurl = $self->acl_feedurl . '?send-notification_emails=false';
+        my $class = $self->acl_entryclass;
+        Any::Moose::load_class($class);
+        my $entry = $class->new(
+            container => $self,
+            %$args
+        )->to_atom;
+        my $atom = $self->service->post($feedurl, $entry);
+        $self->sync if $self->can('sync');
+        return $class->new(
+            container => $self,
+            atom => $atom,
+        );
+    } else {
+        return $next->($self, $args);
+    }
+};
+
 __PACKAGE__->meta->make_immutable;
 
 no Any::Moose;
@@ -459,7 +480,7 @@ You can view the item from the web browser with the url associated with this att
 
 =head1 AUTHOR
 
-Noubo Danjou E<lt>nobuo.danjou@gmail.comE<gt>
+Noubo Danjou E<lt>danjou@soffritto.orgE<gt>
 
 =head1 SEE ALSO
 
