@@ -7,6 +7,11 @@ my $service = service();
 ok my $metadata = $service->metadata;
 ok my $cs = $metadata->largest_changestamp;
 
+{
+    my @changes = $service->changes({'max-results' => 10});
+
+}
+
 ok my @last = $service->changes({'start-index' => $cs, 'max-results' => 5});
 is scalar @last, 1;
 ok ! $service->changes({'start-index' => $cs + 1, 'max-results' => 5});
