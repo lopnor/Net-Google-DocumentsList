@@ -7,7 +7,7 @@ requires_any_moose(
     moose => '0.56',
     mouse => '0.51',
 );
-requires 'Net::Google::DataAPI' => '0.27';
+requires 'Net::Google::DataAPI' => '0.2802';
 requires 'XML::Atom';
 requires 'File::Slurp';
 requires 'MIME::Types';
