@@ -130,7 +130,11 @@ returns map of file formats and types of Google Docs items to be converted:
   my $map = $client->metadata->import_format;
   # returns (for example):
   # {
-  #   '' => [''],
+  #   'application/msword' => ['document'],
+  #   'application/pdf' => ['document'],
+  #   'application/rtf' => ['document'],
+  #   'application/vnd.ms-excel' => ['spreadsheet'],
+  #   ....
   # }
 
 =head2 export_format
@@ -140,7 +144,10 @@ returns map of types of items and exportable formats:
   my $map = $client->metadata->import_format;
   # returns (for example):
   # {
-  #   '' => [''],
+  #   'document' => ['text/html', 'application/pdf', 'text/rtf' ... ],
+  #   'drawing'  => ['application/pdf', 'image/png', 'image/jpeg', 'image/svg+xml' ],
+  #   'presentation' => ['application/vnd.ms-powerpoint', 'text/plain', 'application/pdf', ... ],
+  #   'spreadsheet' => ['application/vnd.ms-excel', 'application/pdf', ... ],
   # }
 
 =head1 AUTHOR
